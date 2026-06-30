@@ -1,0 +1,104 @@
+From 7445b563393a35ec226a559f85bee594eeadeefb Mon Sep 17 00:00:00 2001
+From: Claude <claude@anthropic.com>
+Date: Tue, 30 Jun 2026 10:14:53 +0000
+Subject: [PATCH] Wire APP_NAME/SITE_URL config into GamePage
+
+- Import APP_NAME and SITE_URL from @/config alongside API_URL
+- Use APP_NAME for browser title (idle and your-turn states) instead of hardcoded "chessu"
+- Add getGamePath/getGameUrl/getDisplayGameUrl helpers built on SITE_URL
+- Use getGameUrl() in copyInvite() instead of hardcoded https://ches.su/...
+- Use getDisplayGameUrl() for the displayed invite badge and archive link text
+- Wording polish: "Waiting for another grower." and "Join as light/dark side"
+
+No changes to chess.js logic, Socket.io events, multiplayer/spectator/chat flow, or archive behavior.
+
+Verified:
+- pnpm --filter client lint -> no warnings or errors
+- pnpm build:client -> compiled successfully
+---
+ client/src/components/game/GamePage.tsx | 28 ++++++++++++++++++-------
+ 1 file changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/client/src/components/game/GamePage.tsx b/client/src/components/game/GamePage.tsx
+index 5501521..e916230 100644
+--- a/client/src/components/game/GamePage.tsx
++++ b/client/src/components/game/GamePage.tsx
+@@ -22,7 +22,7 @@ import { Chess } from "chess.js";
+ import type { ClearPremoves } from "react-chessboard";
+ import { Chessboard } from "react-chessboard";
+ 
+-import { API_URL } from "@/config";
++import { API_URL, APP_NAME, SITE_URL } from "@/config";
+ import { io } from "socket.io-client";
+ 
+ import { lobbyReducer, squareReducer } from "./reducers";
+@@ -149,9 +149,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
+     if (lobby.side === "s" || !lobby.white?.id || !lobby.black?.id) return;
+ 
+     if (!lobby.endReason && lobby.side === lobby.actualGame.turn()) {
+-      document.title = "(your turn) chessu";
++      document.title = `(your turn) ${APP_NAME}`;
+     } else {
+-      document.title = "chessu";
++      document.title = APP_NAME;
+     }
+   }
+ 
+@@ -407,8 +407,20 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
+     }
+   }
+ 
++  function getGamePath() {
++    return lobby.endReason ? `archive/${lobby.id}` : initialLobby.code;
++  }
++
++  function getGameUrl() {
++    return `${SITE_URL.replace(/\/$/, "")}/${getGamePath()}`;
++  }
++
++  function getDisplayGameUrl() {
++    return getGameUrl().replace(/^https?:\/\//, "");
++  }
++
+   function copyInvite() {
+-    const text = `https://ches.su/${lobby.endReason ? `archive/${lobby.id}` : initialLobby.code}`;
++    const text = getGameUrl();
+     if ("clipboard" in navigator) {
+       navigator.clipboard.writeText(text);
+     } else {
+@@ -528,13 +540,13 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
+         {(!lobby.white?.id || !lobby.black?.id) && (
+           <div className="absolute bottom-0 right-0 top-0 z-10 flex h-full w-full items-center justify-center bg-black bg-opacity-70">
+             <div className="bg-base-200 flex w-full items-center justify-center gap-4 px-2 py-4">
+-              Waiting for opponent.
++              Waiting for another grower.
+               {session?.user?.id !== lobby.white?.id && session?.user?.id !== lobby.black?.id && (
+                 <button
+                   className={"btn btn-secondary" + (playBtnLoading ? " btn-disabled" : "")}
+                   onClick={clickPlay}
+                 >
+-                  Play as {lobby.white?.id ? "black" : "white"}
++                  Join as {lobby.white?.id ? "dark side" : "light side"}
+                 </button>
+               )}
+             </div>
+@@ -586,7 +598,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
+                   onClick={copyInvite}
+                 >
+                   <IconCopy size={16} />
+-                  ches.su/{lobby.endReason ? `archive/${lobby.id}` : initialLobby.code}
++                  {getDisplayGameUrl()}
+                 </label>
+                 <div tabIndex={0} className="dropdown-content badge badge-neutral text-xs shadow">
+                   copied to clipboard
+@@ -667,7 +679,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
+                     target="_blank"
+                     rel="noopener noreferrer"
+                   >
+-                    ches.su/archive/{lobby.id}
++                    {getDisplayGameUrl()}
+                   </a>
+                   .
+                 </div>
+-- 
+2.43.0
