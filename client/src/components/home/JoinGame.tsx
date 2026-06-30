@@ -20,14 +20,11 @@ export default function JoinGame() {
     const target = e.target as HTMLFormElement;
     const codeEl = target.elements.namedItem("joinGameCode") as HTMLInputElement;
 
-    let code = codeEl.value;
+    let code = codeEl.value.trim();
     if (!code) return;
 
     setButtonLoading(true);
 
-    if (code.startsWith("ches.su")) {
-      code = "http://" + code;
-    }
     if (code.startsWith("http")) {
       code = new URL(code).pathname.split("/")[1];
     }
@@ -47,25 +44,25 @@ export default function JoinGame() {
   return (
     <form
       className={"input-group" + (notFound ? " tooltip tooltip-error tooltip-open" : "")}
-      data-tip="error: game not found"
+      data-tip="session not found"
       onSubmit={submitJoinGame}
     >
       <input
         type="text"
-        placeholder="Invite link or code"
+        placeholder="Invite link or session code"
         className="input input-bordered"
         name="joinGameCode"
         id="joinGameCode"
       />
       <button
         className={
-          "btn" +
+          "btn btn-secondary" +
           (buttonLoading ? " loading" : "") +
           (!session?.user?.id ? " btn-disabled text-base-content" : "")
         }
         type="submit"
       >
-        Join
+        Join Session
       </button>
     </form>
   );
