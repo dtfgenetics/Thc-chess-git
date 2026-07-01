@@ -22,7 +22,8 @@ import { Chess } from "chess.js";
 import type { ClearPremoves } from "react-chessboard";
 import { Chessboard } from "react-chessboard";
 
-import { API_URL } from "@/config";
+import { API_URL, APP_NAME, SITE_URL } from "@/config";
+import { KUSH_BOARD_THEME, KUSH_COPY, KUSH_PIECE_ASSETS } from "@/kushTheme";
 import { io } from "socket.io-client";
 
 import { lobbyReducer, squareReducer } from "./reducers";
@@ -59,11 +60,31 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
       author: {},
-      message: `Welcome! You can invite friends to watch or play by sharing the link above. Have fun!`
+      message: `Welcome to the grow room. Share the invite link to bring in another grower or spectators.`
     }
   ]);
   const chatListRef = useRef<HTMLUListElement>(null);
   const moveListRef = useRef<HTMLDivElement>(null);
+
+  const customPieces = Object.fromEntries(
+    Object.entries(KUSH_PIECE_ASSETS).map(([piece, imageUrl]) => [
+      piece,
+      ({ squareWidth }: { squareWidth: number }) => (
+        <div
+          aria-label={piece}
+          role="img"
+          style={{
+            width: squareWidth,
+            height: squareWidth,
+            backgroundImage: `url(${imageUrl})`,
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "contain"
+          }}
+        />
+      )
+    ])
+  );
 
   const [abandonSeconds, setAbandonSeconds] = useState(60);
   useEffect(() => {
@@ -149,9 +170,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     if (lobby.side === "s" || !lobby.white?.id || !lobby.black?.id) return;
 
     if (!lobby.endReason && lobby.side === lobby.actualGame.turn()) {
-      document.title = "(your turn) chessu";
+      document.title = `(your turn) ${APP_NAME}`;
     } else {
-      document.title = "chessu";
+      document.title = APP_NAME;
     }
   }
 
@@ -220,15 +241,15 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           }, "");
           kingSquare = {
             [kingPos]: {
-              background: "radial-gradient(red, rgba(255,0,0,.4), transparent 70%)",
+              background: `radial-gradient(${KUSH_BOARD_THEME.checkWarning}, transparent 70%)`,
               borderRadius: "50%"
             }
           };
         }
         updateCustomSquares({
           lastMove: {
-            [result.from]: { background: "rgba(255, 255, 0, 0.4)" },
-            [result.to]: { background: "rgba(255, 255, 0, 0.4)" }
+            [result.from]: { background: KUSH_BOARD_THEME.moveHighlight },
+            [result.to]: { background: KUSH_BOARD_THEME.moveHighlight }
           },
           options: {},
           check: kingSquare
@@ -284,14 +305,14 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
         background:
           lobby.actualGame.get(move.to as Square) &&
           lobby.actualGame.get(move.to as Square)?.color !== lobby.actualGame.get(square)?.color
-            ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
-            : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
+            ? `radial-gradient(circle, ${KUSH_BOARD_THEME.legalMove} 85%, transparent 85%)`
+            : `radial-gradient(circle, ${KUSH_BOARD_THEME.legalMove} 25%, transparent 25%)`,
         borderRadius: "50%"
       };
       return move;
     });
     newSquares[square] = {
-      background: "rgba(255, 255, 0, 0.4)"
+      background: KUSH_BOARD_THEME.moveHighlight
     };
     updateCustomSquares({ options: newSquares });
   }
@@ -337,7 +358,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   }
 
   function onSquareRightClick(square: Square) {
-    const colour = "rgba(0, 0, 255, 0.4)";
+    const colour = KUSH_BOARD_THEME.rightClickMarker;
     updateCustomSquares({
       rightClicked: {
         ...customSquares.rightClicked,
@@ -368,10 +389,10 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {lobby.black?.name || "(no one)"}
+          {lobby.black?.name || "(open seat)"}
         </a>
         <span className="flex items-center gap-1 text-xs">
-          black
+          dark side
           {lobby.black?.connected === false && (
             <span className="badge badge-xs badge-error">disconnected</span>
           )}
@@ -389,10 +410,10 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          {lobby.white?.name || "(no one)"}
+          {lobby.white?.name || "(open seat)"}
         </a>
         <span className="flex items-center gap-1 text-xs">
-          white
+          light side
           {lobby.white?.connected === false && (
             <span className="badge badge-xs badge-error">disconnected</span>
           )}
@@ -407,8 +428,20 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     }
   }
 
+  function getGamePath() {
+    return lobby.endReason ? `archive/${lobby.id}` : initialLobby.code;
+  }
+
+  function getGameUrl() {
+    return `${SITE_URL.replace(/\/$/, "")}/${getGamePath()}`;
+  }
+
+  function getDisplayGameUrl() {
+    return getGameUrl().replace(/^https?:\/\//, "");
+  }
+
   function copyInvite() {
-    const text = `https://ches.su/${lobby.endReason ? `archive/${lobby.id}` : initialLobby.code}`;
+    const text = getGameUrl();
     if ("clipboard" in navigator) {
       navigator.clipboard.writeText(text);
     } else {
@@ -502,8 +535,8 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     if (!history.length) return;
 
     return {
-      [history[navIndex].from]: { background: "rgba(255, 255, 0, 0.4)" },
-      [history[navIndex].to]: { background: "rgba(255, 255, 0, 0.4)" }
+      [history[navIndex].from]: { background: KUSH_BOARD_THEME.moveHighlight },
+      [history[navIndex].to]: { background: KUSH_BOARD_THEME.moveHighlight }
     };
   }
 
@@ -528,13 +561,13 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
         {(!lobby.white?.id || !lobby.black?.id) && (
           <div className="absolute bottom-0 right-0 top-0 z-10 flex h-full w-full items-center justify-center bg-black bg-opacity-70">
             <div className="bg-base-200 flex w-full items-center justify-center gap-4 px-2 py-4">
-              Waiting for opponent.
+              {KUSH_COPY.waitingForOpponent}
               {session?.user?.id !== lobby.white?.id && session?.user?.id !== lobby.black?.id && (
                 <button
                   className={"btn btn-secondary" + (playBtnLoading ? " btn-disabled" : "")}
                   onClick={clickPlay}
                 >
-                  Play as {lobby.white?.id ? "black" : "white"}
+                  {lobby.white?.id ? KUSH_COPY.joinDarkSide : KUSH_COPY.joinLightSide}
                 </button>
               )}
             </div>
@@ -543,8 +576,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
         <Chessboard
           boardWidth={boardWidth}
-          customDarkSquareStyle={{ backgroundColor: "#4b7399" }}
-          customLightSquareStyle={{ backgroundColor: "#eae9d2" }}
+          customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
+          customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
+          customPieces={customPieces}
           position={navFen || lobby.actualGame.fen()}
           boardOrientation={lobby.side === "b" ? "black" : "white"}
           isDraggablePiece={isDraggablePiece}
@@ -574,7 +608,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
           <div className="flex flex-1 flex-col gap-1">
             <div className="mb-2 flex w-full flex-col items-end gap-1">
-              {lobby.endReason ? "Archived link:" : "Invite friends:"}
+              {lobby.endReason ? "Archived match link:" : "Invite another grower:"}
               <div
                 className={
                   "dropdown dropdown-top dropdown-end" + (copiedLink ? " dropdown-open" : "")
@@ -586,7 +620,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                   onClick={copyInvite}
                 >
                   <IconCopy size={16} />
-                  ches.su/{lobby.endReason ? `archive/${lobby.id}` : initialLobby.code}
+                  {getDisplayGameUrl()}
                 </label>
                 <div tabIndex={0} className="dropdown-content badge badge-neutral text-xs shadow">
                   copied to clipboard
@@ -654,39 +688,39 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                 <div>
                   {lobby.endReason === "abandoned"
                     ? lobby.winner === "draw"
-                      ? `The game ended in a draw due to abandonment.`
-                      : `The game was won by ${lobby.winner} due to abandonment.`
+                      ? `The match ended in an even harvest due to abandonment.`
+                      : `The match was won by ${lobby.winner} due to abandonment.`
                     : lobby.winner === "draw"
-                      ? "The game ended in a draw."
-                      : `The game was won by checkmate (${lobby.winner}).`}{" "}
+                      ? "The match ended in an even harvest."
+                      : `Harvest complete by checkmate (${lobby.winner}).`} {" "}
                   <br />
-                  You can review the archived game at{" "}
+                  You can review the archived match at {" "}
                   <a
                     className="link"
                     href={`/archive/${lobby.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    ches.su/archive/{lobby.id}
+                    {getDisplayGameUrl()}
                   </a>
                   .
                 </div>
               ) : abandonSeconds > 0 ? (
-                `Your opponent has disconnected. You can claim the win or draw in ${abandonSeconds} second${
+                `The other grower disconnected. You can claim the harvest or even harvest in ${abandonSeconds} second${
                   abandonSeconds > 1 ? "s" : ""
                 }.`
               ) : (
                 <div className="flex flex-wrap items-center justify-center gap-2">
-                  <span>Your opponent has disconnected.</span>
+                  <span>The other grower disconnected.</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => claimAbandoned("win")}
                       className="btn btn-sm btn-primary"
                     >
-                      Claim win
+                      Claim Harvest
                     </button>
                     <button onClick={() => claimAbandoned("draw")} className="btn btn-sm btn-ghost">
-                      Draw
+                      Even Harvest
                     </button>
                   </div>
                 </div>
@@ -702,7 +736,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                 <li
                   className={
                     "max-w-[30rem]" +
-                    (!m.author.id && m.author.name === "server"
+                    (!m.author.id && (m.author.name === "server" || m.author.name === "Grow Room")
                       ? " bg-base-content text-base-300 p-2"
                       : "")
                   }
@@ -726,7 +760,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                         >
                           {m.author.name}
                         </a>
-                        :{" "}
+                        : {" "}
                       </span>
                     )}
                     <span>{m.message}</span>
@@ -737,7 +771,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
             <form className="input-group mt-auto" onSubmit={chatClickSend}>
               <input
                 type="text"
-                placeholder="Chat here..."
+                placeholder="Grow room chat..."
                 className="input input-bordered flex-grow"
                 name="chatInput"
                 id="chatInput"
@@ -745,14 +779,14 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                 required
               />
               <button className="btn btn-secondary ml-1" type="submit">
-                send
+                Send
               </button>
             </form>
           </div>
         </div>
         {lobby.observers && lobby.observers.length > 0 && (
           <div className="w-full px-2 text-xs md:px-0">
-            Spectators: {lobby.observers?.map((o) => o.name).join(", ")}
+            Watching: {lobby.observers?.map((o) => o.name).join(", ")}
           </div>
         )}
       </div>
