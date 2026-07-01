@@ -1,4 +1,5 @@
 import GameAuthWrapper from "@/components/game/GameAuthWrapper";
+import { APP_NAME, SITE_URL } from "@/config";
 import { fetchActiveGame } from "@/lib/game";
 import { notFound } from "next/navigation";
 
@@ -6,7 +7,7 @@ export async function generateMetadata({ params }: { params: { code: string } })
   const game = await fetchActiveGame(params.code);
   if (!game) {
     return {
-      description: "Game not found",
+      description: "Match not found",
       robots: {
         index: false,
         follow: false,
@@ -16,12 +17,13 @@ export async function generateMetadata({ params }: { params: { code: string } })
     };
   }
   return {
-    description: `Play or watch a game with ${game.host?.name}`,
+    title: `${APP_NAME} Match`,
+    description: `Play or watch a Kush Kings Chess match with ${game.host?.name}`,
     openGraph: {
-      title: "chessu",
-      description: `Play or watch a game with ${game.host?.name}`,
-      url: `https://ches.su/${game.code}`,
-      siteName: "chessu",
+      title: APP_NAME,
+      description: `Play or watch a Kush Kings Chess match with ${game.host?.name}`,
+      url: `${SITE_URL.replace(/\/$/, "")}/${game.code}`,
+      siteName: APP_NAME,
       locale: "en_US",
       type: "website"
     },
