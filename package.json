@@ -1,7 +1,8 @@
 {
-    "name": "chessu",
+    "name": "kush-kings-chess",
     "private": "true",
-    "author": "dotnize",
+    "packageManager": "pnpm@9.15.9",
+    "author": "DTF Seeds / THC - Teaching Healthy Cultivation; forked from dotnize/chessu",
     "license": "MIT",
     "scripts": {
         "install:client": "pnpm install --filter client",
@@ -16,6 +17,7 @@
         "start:server": "pnpm --filter server start",
         "lint": "eslint . --ignore-pattern \"pnpm-lock.yaml\" --ignore-path .gitignore",
         "lint:fix": "eslint --fix . --ignore-pattern \"pnpm-lock.yaml\" --ignore-path .gitignore",
+        "check:rebrand": "bash scripts/check-rebrand.sh",
         "format": "prettier --write . \"!pnpm-lock.yaml\" --ignore-path .gitignore"
     },
     "devDependencies": {

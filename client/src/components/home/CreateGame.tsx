@@ -33,13 +33,13 @@ export default function CreateGame() {
   }
 
   return (
-    <form className="form-control" onSubmit={submitCreateGame}>
-      <label className="label cursor-pointer">
-        <span className="label-text">Unlisted/invite-only</span>
-        <input type="checkbox" className="checkbox" name="createUnlisted" id="createUnlisted" />
+    <form className="form-control w-full max-w-xs gap-2" onSubmit={submitCreateGame}>
+      <label className="label cursor-pointer gap-4 rounded-xl bg-base-300 px-4">
+        <span className="label-text">Private grower invite only</span>
+        <input type="checkbox" className="checkbox checkbox-primary" name="createUnlisted" id="createUnlisted" />
       </label>
       <label className="label" htmlFor="createStartingSide">
-        <span className="label-text">Select your side</span>
+        <span className="label-text">Choose your side</span>
       </label>
       <div className="input-group">
         <select
@@ -47,19 +47,19 @@ export default function CreateGame() {
           name="createStartingSide"
           id="createStartingSide"
         >
-          <option value="random">Random</option>
-          <option value="white">White</option>
-          <option value="black">Black</option>
+          <option value="random">Random side</option>
+          <option value="white">Light side</option>
+          <option value="black">Dark side</option>
         </select>
         <button
           className={
-            "btn" +
+            "btn btn-primary" +
             (buttonLoading ? " loading" : "") +
             (!session?.user?.id ? " btn-disabled text-base-content" : "")
           }
           type="submit"
         >
-          Create
+          Start Match
         </button>
       </div>
     </form>

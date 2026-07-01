@@ -35,7 +35,7 @@ Avoid cheap-looking weed graphics or confusing chess-rule changes.
 
 ## Naming direction
 
-Primary: **Kush Kings Chess**  
+Primary: **Kush Kings Chess**
 Secondary/menu label: **THC Chess**
 
 Possible subtitles:

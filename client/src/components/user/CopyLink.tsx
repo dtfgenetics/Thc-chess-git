@@ -1,13 +1,16 @@
 "use client";
 
+import { SITE_URL } from "@/config";
 import { IconCopy } from "@tabler/icons-react";
 import { useState } from "react";
 
 export default function CopyLink({ name }: { name: string }) {
   const [copiedLink, setCopiedLink] = useState(false);
+  const profileUrl = `${SITE_URL.replace(/\/$/, "")}/user/${name}`;
+  const displayProfileUrl = profileUrl.replace(/^https?:\/\//, "");
 
   function copyLink() {
-    const text = `https://ches.su/user/${name}`;
+    const text = profileUrl;
 
     if ("clipboard" in navigator) {
       navigator.clipboard.writeText(text);
@@ -27,7 +30,7 @@ export default function CopyLink({ name }: { name: string }) {
         onClick={copyLink}
       >
         <IconCopy size={16} />
-        ches.su/user/{name}
+        {displayProfileUrl}
       </label>
       <div tabIndex={0} className="dropdown-content badge badge-neutral text-xs shadow">
         copied to clipboard

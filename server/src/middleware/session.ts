@@ -22,18 +22,27 @@ declare module "http" {
         };
     }
 }
+
+const isProduction = process.env.NODE_ENV === "production";
+const sessionSecret = process.env.SESSION_SECRET;
+
+if (isProduction && !sessionSecret) {
+    throw new Error("SESSION_SECRET is required when NODE_ENV=production");
+}
+
 const sessionMiddleware = session({
     store: new PGSession({ pool: db, createTableIfMissing: true }),
-    secret: process.env.SESSION_SECRET || "make sure to change this!",
+    secret: sessionSecret || "local-development-only-change-me",
     resave: false,
     saveUninitialized: false,
-    name: "chessu",
+    name: process.env.SESSION_COOKIE_NAME || "kush_kings_chess",
     proxy: true,
     cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        secure: process.env.NODE_ENV === "production" ? true : false,
+        secure: isProduction,
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+        sameSite: isProduction ? "none" : "lax",
+        domain: process.env.SESSION_COOKIE_DOMAIN || undefined
     },
     genid: function () {
         return nanoid(21);

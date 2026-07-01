@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Dark Rolling Knight</title>
+  <g stroke="#F5E7C8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#123D23" d="M29 108h72l-8-16H37z"/>
+    <path fill="#123D23" d="M39 92c1-24 9-44 27-61l-5-18 24 13 18 21-13 12 7 33z"/>
+    <path d="M49 82c12-3 24-12 36-28M65 31l18 10" fill="none"/>
+    <circle cx="81" cy="38" r="4" fill="#F5E7C8" stroke="none"/>
+    <path fill="#4CAF50" d="M57 54c-10-7-19-7-26 1 8 8 17 8 26-1zm25 13c10-7 19-7 26 1-8 8-17 8-26-1z"/>
+    <path fill="#F5E7C8" d="M31 72l54-28 6 11-54 28z" stroke="#D4A017"/>
+    <path d="M31 72l6 11" stroke="#B43A2E" stroke-width="7"/>
+  </g>
+</svg>

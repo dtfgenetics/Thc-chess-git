@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: DTFlow Coding Agent <green801028@gmail.com>
+Date: Wed, 1 Jul 2026 00:45:00 +0000
+Subject: [PATCH] Wire Kush piece assets into GamePage
+
+Apply after `patches/0001-site-url-config-gamepage-patch.patch`.
+
+Target file:
+
+- `client/src/components/game/GamePage.tsx`
+
+Required changes:
+
+1. Import the asset registry:
+
+```ts
+import { KUSH_BOARD_THEME, KUSH_COPY, KUSH_PIECE_ASSETS } from "@/kushTheme";
+```
+
+2. Add a helper inside `GamePage` before the return:
+
+```tsx
+const customPieces = Object.fromEntries(
+  Object.entries(KUSH_PIECE_ASSETS).map(([piece, imageUrl]) => [
+    piece,
+    ({ squareWidth }: { squareWidth: number }) => (
+      <img
+        src={imageUrl}
+        alt={piece}
+        style={{ width: squareWidth, height: squareWidth }}
+        draggable={false}
+      />
+    )
+  ])
+);
+```
+
+3. Add this prop to `<Chessboard />`:
+
+```tsx
+customPieces={customPieces}
+```
+
+4. Use `KUSH_BOARD_THEME.lightSquare` and `KUSH_BOARD_THEME.darkSquare` for board colors.
+
+5. Use `KUSH_COPY` for waiting/join text.
+
+Verification:
+
+```bash
+pnpm --filter client lint
+pnpm build:client
+```

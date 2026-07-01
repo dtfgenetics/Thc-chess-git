@@ -4,7 +4,7 @@ export default function Register() {
   return (
     <div className="form-control">
       <label htmlFor="registerName" className="label">
-        <span className="label-text">Username</span>
+        <span className="label-text">Grower name</span>
       </label>
       <input
         type="text"
@@ -12,7 +12,7 @@ export default function Register() {
         title="Alphanumeric characters only"
         id="registerName"
         name="registerName"
-        placeholder="username"
+        placeholder="grower name"
         className="input input-bordered"
         maxLength={16}
         minLength={2}

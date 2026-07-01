@@ -10,8 +10,13 @@ import session from "./middleware/session.js";
 import routes from "./routes/index.js";
 import { init as initSocket } from "./socket/index.js";
 
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:3000")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 const corsConfig = {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true
 };
 
@@ -35,6 +40,10 @@ app.set("trust proxy", 1);
 app.use(session);
 app.use("/v1", routes);
 
+app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "ok", app: process.env.APP_NAME || "Kush Kings Chess" });
+});
+
 // socket.io
 export const io = new Server(server, { cors: corsConfig, pingInterval: 30000, pingTimeout: 50000 });
 io.use((socket, next) => {
@@ -53,5 +62,5 @@ initSocket();
 
 const port = process.env.PORT || 3001;
 server.listen(port, () => {
-    console.log(`chessu api server listening on :${port}`);
+    console.log(`${process.env.APP_NAME || "Kush Kings Chess"} api server listening on :${port}`);
 });

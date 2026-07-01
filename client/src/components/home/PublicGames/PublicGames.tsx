@@ -8,15 +8,15 @@ export default async function PublicGames() {
   return (
     <div className="flex flex-col items-center">
       <h2 className="mb-2 text-2xl font-bold leading-tight">
-        Public games <RefreshButton />
+        Public Matches <RefreshButton />
       </h2>
 
       <div className="bg-base-200 h-80 max-h-80 overflow-y-auto rounded-xl">
         <table className="table-compact lg:table-normal table-zebra table rounded-none">
           <thead>
             <tr>
-              <th className="w-48">Host</th>
-              <th className="w-48">Opponent</th>
+              <th className="w-48">Grower</th>
+              <th className="w-48">Challenger</th>
               <th className="w-24"></th>
             </tr>
           </thead>
@@ -45,7 +45,7 @@ export default async function PublicGames() {
               ))
             ) : (
               <tr>
-                <td>(empty)</td>
+                <td>No public matches yet</td>
                 <td></td>
                 <td></td>
               </tr>

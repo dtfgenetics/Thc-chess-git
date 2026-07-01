@@ -1,3 +1,4 @@
+import { KUSH_BOARD_THEME } from "@/kushTheme";
 import type { Action, CustomSquares, Lobby } from "@/types";
 import type { Game, User } from "@chessu/types";
 import type { Dispatch, SetStateAction } from "react";
@@ -21,8 +22,8 @@ export const syncPgn = (
     let kingSquare = undefined;
     if (lastMove) {
         lastMoveSquares = {
-            [lastMove.from]: { background: "rgba(255, 255, 0, 0.4)" },
-            [lastMove.to]: { background: "rgba(255, 255, 0, 0.4)" }
+            [lastMove.from]: { background: KUSH_BOARD_THEME.moveHighlight },
+            [lastMove.to]: { background: KUSH_BOARD_THEME.moveHighlight }
         };
     }
     if (lobby.actualGame.inCheck()) {
@@ -35,7 +36,7 @@ export const syncPgn = (
         }, "");
         kingSquare = {
             [kingPos]: {
-                background: "radial-gradient(red, rgba(255,0,0,.4), transparent 70%)",
+                background: `radial-gradient(${KUSH_BOARD_THEME.checkWarning}, transparent 70%)`,
                 borderRadius: "50%"
             }
         };

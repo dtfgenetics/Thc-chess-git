@@ -1,77 +1,52 @@
 # Kush Kings Chess / THC Chess
 
-Cannabis-themed online chess for the **THC – Teaching Healthy Cultivation** games ecosystem.
+Kush Kings Chess is the real-time multiplayer chess room for the DTF Seeds games hub. This
+project preserves the open-source chess engine and room system from `dotnize/chessu` while
+replacing player-facing presentation with an original cannabis-themed brand.
 
-This repo is a fork/reskin of the open-source `dotnize/chessu` chess app. The goal is to preserve the working online chess engine and multiplayer foundation while replacing the default look, copy, and assets with an original cannabis-themed brand.
+Production targets:
 
-## Current goal
+- Frontend: `https://chess.dtfseeds.com`
+- API and Socket.io: `https://chess-api.dtfseeds.com`
+- Parent hub: `https://dtfseeds.com`
 
-Build a playable browser-based chess game that can be hosted as part of the THC / DTF games hub.
+## Features
 
-The finished game should support:
+- Legal move validation with `chess.js`
+- Real-time create/join rooms through Socket.io
+- Invite links, spectator mode, and room chat
+- Guest or registered player sessions
+- PostgreSQL-backed games, profiles, and archives
+- Replayable archived matches
+- Responsive Kush Kings board and original custom SVG pieces
 
-- Real-time online chess matches
-- Invite links so players can join a match
-- Spectators/watch mode
-- Chat during games
-- Optional user accounts if we keep the upstream account system
-- Mobile-friendly play
-- Cannabis-themed board, pieces, UI copy, and landing page
+## Project guardrails
 
-## What we are not doing
+Do not rebuild or replace the chess rules, room events, or persistence layer unless a verified bug
+requires it. Preserve castling, en passant, promotion, check/checkmate/stalemate, draw, resign,
+abandon, rematch, spectators, chat, and archive behavior.
 
-We are **not** rebuilding chess rules from scratch.
+Do not use copyrighted chess-site art, third-party cannabis logos, or unapproved brand assets.
+New visual assets must be original or explicitly provided and approved for this project.
 
-Do not rewrite or replace the core chess system unless a bug forces it. The existing stack already uses `chess.js` for rules, `react-chessboard` for the board UI, Socket.io for live play, and Express/PostgreSQL for the backend.
+Internal chess and database side values remain `white` and `black`; player-facing copy uses
+light side and dark side.
 
-Do not use copyrighted art, chess.com assets, Lichess art, cannabis brand logos, Monopoly-style assets, or third-party artwork. All new cannabis art must be original, placeholder SVGs, or user-provided approved assets.
+Additional project context is in [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md) and
+[docs/RESPONSIBILITIES.md](docs/RESPONSIBILITIES.md).
 
-## Upstream attribution
+## Branding map
 
-Original project: `dotnize/chessu`  
-Original author: `dotnize`  
-Original license: MIT
-
-This project must preserve the upstream MIT license attribution while adding THC/Kush Kings branding on top.
-
-## Tech stack
-
-- Next.js 14
-- React
-- TypeScript
-- Tailwind CSS + daisyUI
-- react-chessboard
-- chess.js
-- Express.js
-- Socket.io
-- PostgreSQL
-- pnpm workspaces
-
-## Monorepo structure
-
-- `client/` — Next.js frontend
-- `server/` — Express backend
-- `types/` — shared types used by client and server
-
-## Working title
-
-Primary game title: **Kush Kings Chess**  
-Simple menu title: **THC Chess**
-
-## Cannabis reskin map
-
-| Standard piece | THC/Kush Kings version |
+| Standard piece | Kush Kings piece |
 | --- | --- |
 | King | Master Grower |
-| Queen | Mother Plant / Terp Queen |
+| Queen | Mother Plant |
 | Bishop | Breeder |
 | Knight | Rolling Knight |
-| Rook | Grow Tower / Dispensary Tower |
-| Pawn | Seedling / Clone |
+| Rook | Grow Tower |
+| Pawn | Seedling |
 
-## UI copy direction
-
-| Original wording | Branded wording |
+| Standard copy | Player-facing copy |
 | --- | --- |
 | New Game | Start Match |
 | Join Game | Join Session |
@@ -81,92 +56,73 @@ Simple menu title: **THC Chess**
 | Resign | Tap Out |
 | Rematch | Run It Back |
 | Waiting for opponent | Waiting for another grower |
-| Play as white/black | Join as light/dark side |
 
-## Visual direction
+## Tech stack
 
-- Light board squares: parchment / cream
-- Dark board squares: deep cannabis green
-- Highlights: gold
-- Legal move indicators: soft green glow
-- Check warning: amber/red glow
-- General UI: clean, readable, mature, game-ready
-- Avoid sloppy weed-leaf overload; make it look like a real polished board game/digital product
+- Next.js 14, React, TypeScript, Tailwind CSS, and daisyUI
+- `react-chessboard` and `chess.js`
+- Express and Socket.io
+- PostgreSQL
+- pnpm workspaces
 
-## Responsibility map
+## Development
 
-- **User / DTFlow artist:** approves naming, visual direction, final cannabis assets, and deployment target.
-- **ChatGPT:** project architect, repo reviewer, branch/task planner, QA checklist owner, code review helper, documentation editor.
-- **Claude:** implementation partner for branch-by-branch code edits and larger refactors.
-- **GitHub:** source of truth for files, branches, pull requests, issues, and release history.
-
-## First implementation phases
-
-1. Verify fork/source health.
-2. Audit repo structure.
-3. Fix hardcoded upstream URLs and branding references.
-4. Add THC/Kush Kings theme variables.
-5. Reskin board colors and highlights.
-6. Add original placeholder cannabis piece assets.
-7. Rebrand visible UI copy.
-8. Test local two-player multiplayer.
-9. Prepare deployment instructions.
-
-## Local development
-
-Node.js 20 or newer is recommended.
-
-Install dependencies:
+Node.js 20 or newer and pnpm 9.15.9 are recommended.
 
 ```bash
-pnpm install
-```
-
-Run frontend and backend together:
-
-```bash
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Run separately:
+The frontend runs at `http://localhost:3000` and the backend at
+`http://localhost:3001`. Configure PostgreSQL before starting the backend:
 
-```bash
-pnpm dev:client
-pnpm dev:server
+```dotenv
+PGHOST="localhost"
+PGPORT="5432"
+PGUSER="kush_kings"
+PGPASSWORD="local-password"
+PGDATABASE="kush_kings_chess"
 ```
 
-Expected local URLs:
-
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:3001`
-
-## Required server environment
-
-Create `server/.env` with PostgreSQL settings:
-
-```env
-PGHOST=db.example.com
-PGUSER=exampleuser
-PGPASSWORD=examplepassword
-PGDATABASE=chessu
-```
-
-## Build checks
+Required release checks:
 
 ```bash
-pnpm lint
+pnpm check:rebrand
+pnpm --filter client lint
 pnpm build:client
 pnpm build:server
 ```
 
+## Containers and production
+
+For a local production-like stack with PostgreSQL:
+
+```bash
+docker compose up --build
+```
+
+Production uses separate client and server images through `docker-compose.production.yml`.
+Follow [docs/DTFSEEDS_DEPLOYMENT.md](docs/DTFSEEDS_DEPLOYMENT.md); this application cannot be
+deployed as a static-only site.
+
+## Repository layout
+
+- `client` — Next.js frontend
+- `server` — Express + Socket.io backend
+- `types` — shared TypeScript models
+- `deploy` — Nginx and systemd production examples
+
+## Upstream attribution and license
+
+- Original project: `dotnize/chessu`
+- Original author: `dotnize`
+- Original license: MIT
+
+This fork preserves the upstream MIT license: [LICENSE](LICENSE).
+
 ## Definition of done
 
-A change is not complete until:
-
-1. It preserves all standard chess rules.
-2. It does not break multiplayer room creation/joining.
-3. It does not break spectators or chat.
-4. It does not add unapproved third-party art.
-5. It keeps MIT attribution intact.
-6. It runs locally.
-7. It has clear notes for the next person working on the repo.
+A release is complete only when it preserves standard chess behavior, passes the required checks,
+works in two independent player sessions, supports spectators and chat, uses approved assets, and
+has an explicit deployment and rollback record.

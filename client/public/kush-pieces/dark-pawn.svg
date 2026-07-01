@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Dark Seedling pawn</title>
+  <g stroke="#F5E7C8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#123D23" d="M31 108h66l-7-16H38z"/>
+    <path fill="#D4A017" d="M42 91c3-14 11-22 22-22s19 8 22 22z"/>
+    <path d="M64 76V35" fill="none" stroke="#4CAF50" stroke-width="7"/>
+    <path fill="#4CAF50" d="M61 49c-14-12-27-13-38-2 11 12 24 13 38 2zm6 0c14-12 27-13 38-2-11 12-24 13-38 2zM64 38c-7-11-7-20 0-28 8 8 8 17 0 28z"/>
+    <path fill="#123D23" d="M45 79c5-7 11-10 19-10l-7 18zm38 0c-5-7-11-10-19-10l7 18z"/>
+    <path d="M50 92l14-8 14 8" fill="none"/>
+  </g>
+</svg>

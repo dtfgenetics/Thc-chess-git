@@ -1,4 +1,5 @@
 import CopyLink from "@/components/user/CopyLink";
+import { APP_NAME, SITE_URL } from "@/config";
 import { fetchProfileData } from "@/lib/user";
 import { notFound } from "next/navigation";
 
@@ -6,7 +7,7 @@ export async function generateMetadata({ params }: { params: { name: string } })
   const data = await fetchProfileData(params.name);
   if (!data) {
     return {
-      description: "User not found",
+      description: "Grower profile not found",
       robots: {
         index: false,
         follow: false,
@@ -16,13 +17,13 @@ export async function generateMetadata({ params }: { params: { name: string } })
     };
   }
   return {
-    title: `${data.name} | chessu`,
-    description: `${data.name}'s profile`,
+    title: `${data.name} | ${APP_NAME}`,
+    description: `${data.name}'s Kush Kings Chess profile`,
     openGraph: {
-      title: `${data.name} | chessu`,
-      description: `${data.name}'s profile on chessu`,
-      url: `https://ches.su/user/${data.name}`,
-      siteName: "chessu",
+      title: `${data.name} | ${APP_NAME}`,
+      description: `${data.name}'s profile on ${APP_NAME}`,
+      url: `${SITE_URL.replace(/\/$/, "")}/user/${data.name}`,
+      siteName: APP_NAME,
       locale: "en_US",
       type: "website"
     },
@@ -50,7 +51,7 @@ export default async function Profile({ params }: { params: { name: string } }) 
             <span className="text-xl font-bold">{data.wins}</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-sm">Draws</span>
+            <span className="text-sm">Even Harvests</span>
             <span className="text-xl font-bold">{data.draws}</span>
           </div>
           <div className="flex flex-col items-center">
@@ -62,7 +63,7 @@ export default async function Profile({ params }: { params: { name: string } }) 
       </div>
 
       <div>
-        <h2 className="mb-1 text-lg font-bold">Recent games</h2>
+        <h2 className="mb-1 text-lg font-bold">Recent matches</h2>
         <ul className="bg-base-300 flex h-[60vh] flex-col gap-1 overflow-y-scroll rounded-lg">
           {data.recentGames.map((game) => {
             let endReason = game.endReason as string;
@@ -80,7 +81,7 @@ export default async function Profile({ params }: { params: { name: string } }) 
                 <div className="flex w-72 justify-between">
                   <div className="flex flex-col">
                     <span className="flex items-center gap-1 text-sm">
-                      White
+                      Light side
                       {game.winner === "white" && (
                         <span className="badge badge-xs badge-success">winner</span>
                       )}
@@ -108,7 +109,7 @@ export default async function Profile({ params }: { params: { name: string } }) 
                       {game.winner === "black" && (
                         <span className="badge badge-xs badge-success">winner</span>
                       )}
-                      Black
+                      Dark side
                     </span>
                     <a
                       className={
@@ -155,7 +156,7 @@ export default async function Profile({ params }: { params: { name: string } }) 
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Review game
+                  Review match
                 </a>
               </li>
             );

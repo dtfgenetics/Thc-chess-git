@@ -2,41 +2,56 @@
 module.exports = {
     content: ["./src/**/*.{js,ts,jsx,tsx}"],
     theme: {
-        extend: {}
+        extend: {
+            colors: {
+                kush: {
+                    parchment: "#F5E7C8",
+                    cream: "#FFF8E6",
+                    green: "#123D23",
+                    forest: "#0B2616",
+                    leaf: "#2E7D32",
+                    gold: "#D4A017",
+                    amber: "#C8791A",
+                    ember: "#B43A2E"
+                }
+            }
+        }
     },
     plugins: [require("daisyui")],
-    darkMode: ["class", '[data-theme="chessuDark"]'],
+    darkMode: ["class", '[data-theme="kushKingsDark"]'],
     daisyui: {
-        // based on daisyUI night and winter themes
         themes: [
             {
-                chessuLight: {
-                    primary: "#047AFF",
-                    secondary: "#818CF8",
-                    accent: "#C148AC",
-                    neutral: "#9ab3d9",
-                    "base-100": "#FFFFFF",
-                    "base-200": "#F2F7FF",
-                    "base-300": "#E3E9F4",
-                    "base-content": "#394E6A",
-                    info: "#93E7FB",
-                    success: "#81CFD1",
-                    warning: "#EFD7BB",
-                    error: "#E58B8B"
+                kushKingsLight: {
+                    primary: "#1F6F3A",
+                    secondary: "#D4A017",
+                    accent: "#7A4E18",
+                    neutral: "#38523C",
+                    "base-100": "#FFF8E6",
+                    "base-200": "#F5E7C8",
+                    "base-300": "#E4CFA4",
+                    "base-content": "#1D2419",
+                    info: "#6BAA75",
+                    success: "#2E7D32",
+                    warning: "#C8791A",
+                    error: "#B43A2E"
                 },
-                chessuDark: {
-                    primary: "#38BDF8",
-                    secondary: "#818CF8",
-                    accent: "#1d4ed8",
-                    neutral: "#1E293B",
-                    "base-100": "#0F172A",
-                    info: "#0CA5E9",
-                    success: "#2DD4BF",
-                    warning: "#F4BF50",
-                    error: "#FB7085"
+                kushKingsDark: {
+                    primary: "#4CAF50",
+                    secondary: "#D4A017",
+                    accent: "#C8791A",
+                    neutral: "#123D23",
+                    "base-100": "#0B2616",
+                    "base-200": "#123D23",
+                    "base-300": "#1D3F27",
+                    "base-content": "#FFF8E6",
+                    info: "#6BAA75",
+                    success: "#4CAF50",
+                    warning: "#D4A017",
+                    error: "#E05A47"
                 }
             }
         ],
-        darkTheme: "chessuDark"
+        darkTheme: "kushKingsDark"
     }
 };

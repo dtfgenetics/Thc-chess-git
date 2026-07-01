@@ -1,14 +1,16 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "Kush Kings Chess",
+  "short_name": "THC Chess",
+  "description": "A cannabis-themed online chess arena for the DTF Seeds games hub.",
   "icons": [
     {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "/kush-kings-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ],
-  "theme_color": "#F2F7FF",
-  "background_color": "#0F172A",
-  "display": "standalone"
+  "theme_color": "#123D23",
+  "background_color": "#0B2616",
+  "display": "standalone",
+  "start_url": "/"
 }

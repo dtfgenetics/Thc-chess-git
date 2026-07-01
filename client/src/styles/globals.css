@@ -13,5 +13,46 @@
   border-radius: 2px;
 }
 
+@keyframes kush-piece-settle {
+  0% {
+    opacity: 0.76;
+    filter: drop-shadow(0 0 0 rgba(212, 160, 23, 0));
+  }
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
+  }
+}
+
+@keyframes kush-piece-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.24));
+  }
+  50% {
+    filter: drop-shadow(0 4px 10px rgba(212, 160, 23, 0.3));
+  }
+}
+
+.kush-piece {
+  animation: kush-piece-settle 160ms ease-out both;
+  pointer-events: none;
+  user-select: none;
+  will-change: opacity, filter;
+}
+
+.kush-piece--active {
+  animation:
+    kush-piece-settle 160ms ease-out both,
+    kush-piece-glow 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kush-piece,
+  .kush-piece--active {
+    animation: none;
+  }
+}
+
 @tailwind components;
 @tailwind utilities;

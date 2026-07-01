@@ -16,7 +16,7 @@ export default function RefreshButton() {
 
   return (
     <button
-      aria-label="Refresh public games"
+      aria-label="Refresh public matches"
       className={"btn btn-sm btn-square btn-ghost" + (isLoading ? " loading" : "")}
       onClick={handleRefresh}
     >

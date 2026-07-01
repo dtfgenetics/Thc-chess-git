@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Dark Master Grower king</title>
+  <g stroke="#F5E7C8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#123D23" d="M28 108h72l-7-15H35z"/>
+    <path fill="#123D23" d="M40 93c1-22 8-35 24-42 16 7 23 20 24 42z"/>
+    <circle cx="64" cy="45" r="16" fill="#123D23"/>
+    <path fill="#D4A017" d="M35 38h58l-8-9H43z"/>
+    <path fill="#123D23" d="M47 29l5-18h24l5 18z"/>
+    <path fill="#4CAF50" d="M64 20c-8 5-11 11-8 18 5-2 8-5 10-10 3 4 8 6 13 6-2-7-6-11-15-14z"/>
+    <path d="M53 49c6 4 16 4 22 0M55 61c5 8 13 8 18 0" fill="none"/>
+    <path d="M43 84l-9-11m51 11 9-11" fill="none" stroke="#D4A017"/>
+  </g>
+</svg>

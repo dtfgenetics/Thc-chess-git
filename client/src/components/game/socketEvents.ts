@@ -5,6 +5,12 @@ import type { Socket } from "socket.io-client";
 
 import { syncPgn, syncSide } from "./utils";
 
+function displaySide(side?: "white" | "black" | "draw") {
+    if (side === "white") return "light side";
+    if (side === "black") return "dark side";
+    return "even harvest";
+}
+
 export function initSocket(
     user: User,
     socket: Socket,
@@ -45,8 +51,8 @@ export function initSocket(
 
     socket.on("userJoinedAsPlayer", ({ name, side }: { name: string; side: "white" | "black" }) => {
         actions.addMessage({
-            author: { name: "server" },
-            message: `${name} is now playing as ${side}.`
+            author: { name: "Grow Room" },
+            message: `${name} joined the match on the ${displaySide(side)}.`
         });
     });
 
@@ -64,25 +70,25 @@ export function initSocket(
             id: number;
         }) => {
             const m = {
-                author: { name: "server" }
+                author: { name: "Grow Room" }
             } as Message;
 
             if (reason === "abandoned") {
                 if (!winnerSide) {
-                    m.message = `${winnerName} has claimed a draw due to abandonment.`;
+                    m.message = `${winnerName} claimed an even harvest due to abandonment.`;
                 } else {
-                    m.message = `${winnerName} (${winnerSide}) has claimed the win due to abandonment.`;
+                    m.message = `${winnerName} (${displaySide(winnerSide)}) claimed the win due to abandonment.`;
                 }
             } else if (reason === "checkmate") {
-                m.message = `${winnerName} (${winnerSide}) has won by checkmate.`;
+                m.message = `Harvest complete: ${winnerName} (${displaySide(winnerSide)}) won by checkmate.`;
             } else {
-                let message = "The game has ended in a draw";
+                let message = "The match ended in an even harvest";
                 if (reason === "repetition") {
                     message = message.concat(" due to threefold repetition");
                 } else if (reason === "insufficient") {
                     message = message.concat(" due to insufficient material");
                 } else if (reason === "stalemate") {
-                    message = "The game has been drawn due to stalemate";
+                    message = "The match ended in an even harvest due to stalemate";
                 }
                 m.message = message.concat(".");
             }

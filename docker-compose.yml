@@ -1,37 +1,57 @@
-version: '3.8'
+name: kush-kings-chess-local
 
 services:
-  chessu:
-    image: chessu:latest # Replace with the correct image if needed
-    container_name: chessu_container
-    environment:
-      POSTGRES_DB: chessu
-      POSTGRES_USER: exampleuser
-      POSTGRES_PASSWORD: examplepassword
-      DATABASE_URL: postgres://chessu_user:chessu_pass@db:5432/chessu
-    ports:
-      - "3000:3000"
-      - "3001:3001"
-    depends_on:
-      - db
-    networks:
-      - chessu_network
-
   db:
-    image: postgres:15
-    container_name: postgres_container
+    image: postgres:16-alpine
     environment:
-      POSTGRES_DB: chessu
-      POSTGRES_USER: exampleuser
-      POSTGRES_PASSWORD: examplepassword
+      POSTGRES_DB: kush_kings_chess
+      POSTGRES_USER: kush_kings
+      POSTGRES_PASSWORD: local-development-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kush_kings -d kush_kings_chess"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - chessu_network
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    environment:
+      APP_NAME: Kush Kings Chess
+      NODE_ENV: development
+      PORT: "3001"
+      CORS_ORIGIN: http://localhost:3000
+      SESSION_COOKIE_NAME: kush_kings_chess
+      SESSION_SECRET: local-development-only-change-me
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: kush_kings
+      PGPASSWORD: local-development-only
+      PGDATABASE: kush_kings_chess
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+      args:
+        NEXT_PUBLIC_APP_NAME: Kush Kings Chess
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
 
 volumes:
   postgres_data:
-
-networks:
-  chessu_network:
-    driver: bridge
