@@ -3,6 +3,9 @@
 Kush Kings Chess is a three-service application: a Next.js frontend, an Express + Socket.io
 room server, and PostgreSQL. It cannot be deployed as static files alone.
 
+See [PRODUCTION_DEPLOYMENT_STATUS.md](PRODUCTION_DEPLOYMENT_STATUS.md) for the latest verified
+state of DNS and available Hostinger infrastructure.
+
 ## Production endpoints
 
 - Games hub: `https://dtfseeds.com`
