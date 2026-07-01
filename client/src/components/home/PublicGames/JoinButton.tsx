@@ -16,12 +16,12 @@ export default function JoinButton({ code }: { code: string }) {
   return (
     <button
       className={
-        "btn btn-ghost btn-xs focus:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" +
+        "btn btn-secondary btn-xs focus:opacity-100 lg:opacity-0 lg:group-hover:opacity-100" +
         (isLoading ? " btn-disabled" : "")
       }
       onClick={handleJoin}
     >
-      Join
+      Join Session
     </button>
   );
 }
