@@ -3,11 +3,14 @@
 import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 
+const DARK_THEME = "kushKingsDark";
+const LIGHT_THEME = "kushKingsLight";
+
 export default function ThemeToggle() {
   const [darkTheme, setDarkTheme] = useState(true);
 
   useEffect(() => {
-    if (document.documentElement.getAttribute("data-theme") === "chessuDark") {
+    if (document.documentElement.getAttribute("data-theme") === DARK_THEME) {
       setDarkTheme(true);
     } else {
       setDarkTheme(false);
@@ -16,14 +19,14 @@ export default function ThemeToggle() {
 
   function toggleTheme() {
     if (
-      document.documentElement.getAttribute("data-theme") === "chessuDark" ||
+      document.documentElement.getAttribute("data-theme") === DARK_THEME ||
       (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
     ) {
-      document.documentElement.setAttribute("data-theme", "chessuLight");
+      document.documentElement.setAttribute("data-theme", LIGHT_THEME);
       localStorage.theme = "light";
       setDarkTheme(false);
     } else {
-      document.documentElement.setAttribute("data-theme", "chessuDark");
+      document.documentElement.setAttribute("data-theme", DARK_THEME);
       localStorage.theme = "dark";
       setDarkTheme(true);
     }
