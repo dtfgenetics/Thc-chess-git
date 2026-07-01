@@ -4,7 +4,7 @@ export default function Login() {
   return (
     <div className="form-control">
       <label htmlFor="loginName" className="label">
-        <span className="label-text">Username or email</span>
+        <span className="label-text">Grower name or email</span>
       </label>
       <input
         type="text"
@@ -12,7 +12,7 @@ export default function Login() {
         title="Alphanumeric characters only"
         id="loginName"
         name="loginName"
-        placeholder="username"
+        placeholder="grower name"
         className="input input-bordered"
         maxLength={16}
         minLength={2}
