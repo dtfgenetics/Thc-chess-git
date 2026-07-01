@@ -5,26 +5,27 @@ export default function Footer() {
     <footer className="footer border-base-300 dark:border-neutral text-base-content mx-1 mt-4 w-auto grid-flow-col items-center justify-between border-t-2 p-4 md:mx-16 lg:mx-40">
       <div className="items-center">
         <p>
-          &copy; 2023{" "}
+          &copy; 2026{" "}
           <a
-            href="https://n9ze.com"
+            href="https://dtfseeds.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="link-hover"
+            className="link-hover font-semibold"
           >
-            nize
-          </a>
+            DTF Seeds
+          </a>{" "}
+          / THC - Teaching Healthy Cultivation
         </p>
       </div>
       <div className="items-center">
         <a
-          href="https://github.com/dotnize/chessu"
+          href="https://github.com/dtfgenetics/Thc-chess-git"
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-ghost btn-sm gap-1 normal-case"
         >
           <IconBrandGithub className="inline-block" size={16} />
-          GitHub
+          Project Repo
         </a>
       </div>
     </footer>
