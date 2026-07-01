@@ -16,7 +16,7 @@ export default function Settings() {
   if (!session || session.user === undefined) {
     return (
       <div className="flex flex-col items-center justify-center gap-4">
-        <div className="text-xl">Loading user...</div>
+        <div className="text-xl">Loading grower profile...</div>
       </div>
     );
   }
@@ -51,7 +51,7 @@ export default function Settings() {
       setServerMessage(user);
     } else if (user?.id) {
       session?.setUser(user);
-      setServerMessage("Account updated successfully");
+      setServerMessage("Grower profile updated successfully");
       setTimeout(() => {
         setServerMessage(null);
       }, 5000);
@@ -62,11 +62,11 @@ export default function Settings() {
   }
   return (
     <div className="flex w-full flex-col justify-center md:w-1/2">
-      <h2 className="text-2xl font-bold">Account settings</h2>
+      <h2 className="text-2xl font-bold">Grower settings</h2>
 
       <form className="form-control mt-4" onSubmit={updateAccount}>
         <label className="label" htmlFor="updateUsername">
-          <span className="label-text">Username</span>
+          <span className="label-text">Grower name</span>
         </label>
         <input
           type="text"
@@ -74,7 +74,7 @@ export default function Settings() {
           title="Alphanumeric characters only"
           id="updateUsername"
           name="updateUsername"
-          placeholder={session.user.name || "Username"}
+          placeholder={session.user.name || "Grower name"}
           defaultValue={session.user.name || undefined}
           className="input input-bordered w-full"
           maxLength={16}
@@ -109,8 +109,8 @@ export default function Settings() {
           </div>
         )}
         <div className="mt-4">
-          <button type="submit" className={"btn" + (buttonLoading ? " loading" : "")}>
-            Update
+          <button type="submit" className={"btn btn-primary" + (buttonLoading ? " loading" : "")}>
+            Update Profile
           </button>
         </div>
       </form>
