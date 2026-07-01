@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Kush Kings Chess Mark</title>
+  <desc id="desc">Original crown and leaf chess mark for Kush Kings Chess.</desc>
+  <rect width="512" height="512" rx="96" fill="#0B2616"/>
+  <path d="M106 330h300l-26 86H132l-26-86Z" fill="#D4A017"/>
+  <path d="M132 304 82 158l98 78 76-126 76 126 98-78-50 146H132Z" fill="#F5E7C8"/>
+  <circle cx="256" cy="124" r="24" fill="#D4A017"/>
+  <path d="M256 210c-52 38-70 82-54 132 35-10 58-31 70-63 18 30 47 46 86 49-8-54-42-94-102-118Z" fill="#2E7D32"/>
+  <path d="M256 210c-12 42-12 82 0 120" fill="none" stroke="#F5E7C8" stroke-width="12" stroke-linecap="round"/>
+</svg>
