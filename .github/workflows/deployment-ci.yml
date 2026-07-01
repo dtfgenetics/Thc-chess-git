@@ -1,0 +1,67 @@
+name: Deployment CI
+
+on:
+  push:
+    branches:
+      - deploy/dtfseeds-production
+    paths:
+      - Dockerfile.client
+      - Dockerfile.server
+      - docker-compose.production.yml
+      - .dockerignore
+      - .env.production.example
+      - deploy/**
+      - client/**
+      - server/**
+      - types/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - Dockerfile.client
+      - Dockerfile.server
+      - docker-compose.production.yml
+      - .dockerignore
+      - .env.production.example
+      - deploy/**
+      - client/**
+      - server/**
+      - types/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+
+jobs:
+  compose-config:
+    name: Validate production Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create validation environment
+        run: cp .env.production.example .env.production
+
+      - name: Validate Compose configuration
+        run: docker compose --env-file .env.production -f docker-compose.production.yml config --quiet
+
+  docker-build:
+    name: Build ${{ matrix.service }} image
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: client
+            dockerfile: Dockerfile.client
+          - service: server
+            dockerfile: Dockerfile.server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build --file "${{ matrix.dockerfile }}" --tag "kush-kings-${{ matrix.service }}:ci" .

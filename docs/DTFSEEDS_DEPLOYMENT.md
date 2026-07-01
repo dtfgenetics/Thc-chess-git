@@ -31,6 +31,8 @@ Create `A` records for `chess.dtfseeds.com` and `chess-api.dtfseeds.com` pointin
 IPv4 address. Add matching `AAAA` records only when the VPS has working public IPv6. Wait until
 both hostnames resolve to the server before requesting certificates.
 
+The exact Ubuntu/DNS commands are in [deploy/vps/README.md](../deploy/vps/README.md).
+
 ## 2. Host prerequisites
 
 Install Docker Engine with the Compose plugin, Nginx, and Certbot using the VPS distribution's
@@ -111,6 +113,10 @@ The API proxy preserves the `Upgrade` and `Connection` headers required by Socke
 Add a Kush Kings Chess entry in the DTF Seeds games hub that links to
 `https://chess.dtfseeds.com`. An iframe is optional; a normal link is the more robust first
 release. If embedding, validate mobile sizing and the parent site's content-security policy.
+
+Use [deploy/hub/kush-kings-chess-link.html](../deploy/hub/kush-kings-chess-link.html) as the
+integration copy source. Do not publish the hub link until the frontend, API health endpoint, and
+two-browser multiplayer smoke test pass.
 
 ## 7. Production verification
 

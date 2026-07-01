@@ -4,8 +4,8 @@ Audit date: 2026-07-01
 
 ## Repository and CI
 
-- Branch: `fix/site-url-config`
-- Pull request: `https://github.com/dtfgenetics/Thc-chess-git/pull/2`
+- PR #2 was squash-merged into `main` as commit `3de69c9`.
+- Deployment branch: `deploy/dtfseeds-production`
 - Client CI: frozen install, rebrand check, lint, and production build pass.
 - Server CI: frozen install and TypeScript production build pass.
 
