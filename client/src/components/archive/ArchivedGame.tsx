@@ -1,5 +1,7 @@
 "use client";
 
+import { SITE_URL } from "@/config";
+import { KUSH_BOARD_THEME, KUSH_PIECE_ASSETS } from "@/kushTheme";
 import type { CustomSquares } from "@/types";
 import { Game } from "@chessu/types";
 import {
@@ -25,6 +27,28 @@ export default function ArchivedGame({ game }: { game: Game }) {
   const [showPgn, setShowPgn] = useState(true);
   const actualGame = new Chess();
   actualGame.loadPgn(game.pgn as string);
+  const archiveUrl = `${SITE_URL.replace(/\/$/, "")}/archive/${game.id}`;
+  const displayArchiveUrl = archiveUrl.replace(/^https?:\/\//, "");
+
+  const customPieces = Object.fromEntries(
+    Object.entries(KUSH_PIECE_ASSETS).map(([piece, imageUrl]) => [
+      piece,
+      ({ squareWidth }: { squareWidth: number }) => (
+        <div
+          aria-label={piece}
+          role="img"
+          style={{
+            width: squareWidth,
+            height: squareWidth,
+            backgroundImage: `url(${imageUrl})`,
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "contain"
+          }}
+        />
+      )
+    ])
+  );
 
   const [customSquares, updateCustomSquares] = useReducer(
     (squares: CustomSquares, action: Partial<CustomSquares>) => {
@@ -68,7 +92,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
   }, []);
 
   function copyLink() {
-    const text = `https://ches.su/archive/${game.id}`;
+    const text = archiveUrl;
     if ("clipboard" in navigator) {
       navigator.clipboard.writeText(text);
     } else {
@@ -81,7 +105,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
   }
 
   function onSquareRightClick(square: Square) {
-    const colour = "rgba(0, 0, 255, 0.4)";
+    const colour = KUSH_BOARD_THEME.rightClickMarker;
     updateCustomSquares({
       rightClicked: {
         ...customSquares.rightClicked,
@@ -171,12 +195,11 @@ export default function ArchivedGame({ game }: { game: Game }) {
     const history = actualGame.history({ verbose: true });
 
     if (!history.length) return;
-
-    let index = navIndex ?? history.length - 1;
+    const index = navIndex ?? history.length - 1;
 
     return {
-      [history[index].from]: { background: "rgba(255, 255, 0, 0.4)" },
-      [history[index].to]: { background: "rgba(255, 255, 0, 0.4)" }
+      [history[index].from]: { background: KUSH_BOARD_THEME.moveHighlight },
+      [history[index].to]: { background: KUSH_BOARD_THEME.moveHighlight }
     };
   }
 
@@ -194,7 +217,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
         >
           {game.black?.name}
         </a>
-        <span className="flex items-center gap-1 text-xs">black</span>
+        <span className="flex items-center gap-1 text-xs">dark side</span>
       </div>
     );
     const whiteHtml = (
@@ -210,7 +233,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
         >
           {game.white?.name}
         </a>
-        <span className="flex items-center gap-1 text-xs">white</span>
+        <span className="flex items-center gap-1 text-xs">light side</span>
       </div>
     );
     if (flipBoard) {
@@ -225,8 +248,9 @@ export default function ArchivedGame({ game }: { game: Game }) {
       <div className="h-min">
         <Chessboard
           boardWidth={boardWidth}
-          customDarkSquareStyle={{ backgroundColor: "#4b7399" }}
-          customLightSquareStyle={{ backgroundColor: "#eae9d2" }}
+          customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
+          customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
+          customPieces={customPieces}
           position={navFen || actualGame.fen()}
           boardOrientation={flipBoard ? "black" : "white"}
           isDraggablePiece={() => false}
@@ -254,7 +278,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
 
           <div className="flex flex-1 flex-col gap-1">
             <div className="mb-2 flex w-full flex-col items-end gap-1">
-              Archived link:
+              Archived match link:
               <div
                 className={
                   "dropdown dropdown-top dropdown-end" + (copiedLink ? " dropdown-open" : "")
@@ -266,7 +290,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
                   onClick={copyLink}
                 >
                   <IconCopy size={16} />
-                  ches.su/archive/{game.id}
+                  {displayArchiveUrl}
                 </label>
                 <div tabIndex={0} className="dropdown-content badge badge-neutral text-xs shadow">
                   copied to clipboard
@@ -321,11 +345,11 @@ export default function ArchivedGame({ game }: { game: Game }) {
           <div className="bg-base-300 flex h-full w-full min-w-[64px] flex-col rounded-lg p-4 shadow-sm">
             {game.endReason === "abandoned"
               ? game.winner === "draw"
-                ? "The game ended in a draw due to abandonment."
-                : `The game was won by ${game.winner} due to abandonment.`
+                ? "The match ended in an even harvest due to abandonment."
+                : `The match was won by ${game.winner} due to abandonment.`
               : game.winner === "draw"
-                ? "The game ended in a draw."
-                : `The game was won by checkmate (${game.winner}).`}
+                ? "The match ended in an even harvest."
+                : `Harvest complete by checkmate (${game.winner}).`}
 
             <div className="mt-2 flex items-center justify-end">
               <button
@@ -341,20 +365,19 @@ export default function ArchivedGame({ game }: { game: Game }) {
                 <button
                   className={
                     "btn btn-sm rounded-b-none rounded-tl-none normal-case" +
-                    (showPgn ? "" : " btn-primary")
+                    (!showPgn ? " btn-primary" : "")
                   }
                   onClick={() => setShowPgn(false)}
                 >
-                  Current FEN
+                  Final FEN
                 </button>
               </div>
             </div>
             <textarea
-              className="textarea h-full rounded-tr-none"
+              className="textarea-bordered textarea h-full w-full resize-none rounded-tr-none font-mono text-xs leading-6"
+              value={showPgn ? (game.pgn as string) : actualGame.fen()}
               readOnly
-              value={showPgn ? game.pgn : navFen || actualGame.fen()}
-              onFocus={(e) => e.target.select()}
-            />
+            ></textarea>
           </div>
         </div>
       </div>
