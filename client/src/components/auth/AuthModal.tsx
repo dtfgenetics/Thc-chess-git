@@ -109,10 +109,10 @@ export default function AuthModal() {
             <div className="flex flex-col gap-2 pt-2">
               <div className="flex w-full justify-between">
                 <div>
-                  Logged in as <b>{session.user.name}</b>
+                  Grower profile: <b>{session.user.name}</b>
                 </div>
                 <a className="link" onClick={clickLogout}>
-                  Logout
+                  Leave Room
                 </a>
               </div>
               <div className="flex w-full flex-col">
@@ -121,14 +121,14 @@ export default function AuthModal() {
                   href={`/user/${session.user.name}`}
                   onClick={() => ((modalToggleRef.current as HTMLInputElement).checked = false)}
                 >
-                  <IconUserCircle /> View profile
+                  <IconUserCircle /> View grower profile
                 </Link>
                 <Link
                   className="btn btn-ghost gap-1 normal-case"
                   href="/settings"
                   onClick={() => ((modalToggleRef.current as HTMLInputElement).checked = false)}
                 >
-                  <IconSettings2 /> Account settings
+                  <IconSettings2 /> Grower settings
                 </Link>
               </div>
 
@@ -152,7 +152,7 @@ export default function AuthModal() {
                       : " text-base-content border-opacity-10 hover:border-opacity-30")
                   }
                 >
-                  Guest
+                  Guest Grower
                 </span>
                 <span
                   onClick={() => setActiveTab("login")}
@@ -163,7 +163,7 @@ export default function AuthModal() {
                       : " text-base-content border-opacity-10 hover:border-opacity-30")
                   }
                 >
-                  Login
+                  Returning Grower
                 </span>
                 <span
                   onClick={() => setActiveTab("register")}
@@ -174,13 +174,13 @@ export default function AuthModal() {
                       : " text-base-content border-opacity-10 hover:border-opacity-30")
                   }
                 >
-                  Register
+                  New Grower
                 </span>
               </div>
 
               <form className="flex flex-col px-2" onSubmit={submitAuth}>
                 {activeTab === "guest" && (
-                  <Guest currentName={session?.user?.name || "unknown user"} />
+                  <Guest currentName={session?.user?.name || "unknown grower"} />
                 )}
                 {activeTab === "login" && <Login />}
                 {activeTab === "register" && <Register />}
@@ -192,10 +192,10 @@ export default function AuthModal() {
                       Close
                     </label>
                   )}
-                  <button className={"btn" + (buttonLoading ? " loading" : "")} type="submit">
-                    {activeTab === "guest" && "Confirm"}
-                    {activeTab === "login" && "Login"}
-                    {activeTab === "register" && "Register"}
+                  <button className={"btn btn-primary" + (buttonLoading ? " loading" : "")} type="submit">
+                    {activeTab === "guest" && "Enter Grow Room"}
+                    {activeTab === "login" && "Enter Match Hub"}
+                    {activeTab === "register" && "Create Grower"}
                   </button>
                 </div>
               </form>
