@@ -36,6 +36,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
       ({ squareWidth }: { squareWidth: number }) => (
         <div
           aria-label={piece}
+          className="kush-piece"
           role="img"
           style={{
             width: squareWidth,
