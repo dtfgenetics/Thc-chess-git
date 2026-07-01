@@ -1,4 +1,5 @@
 import ArchivedGame from "@/components/archive/ArchivedGame";
+import { APP_NAME, SITE_URL } from "@/config";
 import { fetchArchivedGame } from "@/lib/game";
 import type { Game } from "@chessu/types";
 import { notFound } from "next/navigation";
@@ -7,7 +8,7 @@ export async function generateMetadata({ params }: { params: { id: number } }) {
   const game = (await fetchArchivedGame({ id: params.id })) as Game | undefined;
   if (!game) {
     return {
-      description: "Game not found",
+      description: "Archived match not found",
       robots: {
         index: false,
         follow: false,
@@ -17,12 +18,13 @@ export async function generateMetadata({ params }: { params: { id: number } }) {
     };
   }
   return {
-    description: `Archived game: ${game.white?.name} vs ${game.black?.name}`,
+    title: `${APP_NAME} Archive`,
+    description: `Archived Kush Kings Chess match: ${game.white?.name} vs ${game.black?.name}`,
     openGraph: {
-      title: "chessu",
-      description: `Archived game: ${game.white?.name} vs ${game.black?.name}`,
-      url: `https://ches.su/archive/${game.id}`,
-      siteName: "chessu",
+      title: `${APP_NAME} Archive`,
+      description: `Archived Kush Kings Chess match: ${game.white?.name} vs ${game.black?.name}`,
+      url: `${SITE_URL.replace(/\/$/, "")}/archive/${game.id}`,
+      siteName: APP_NAME,
       locale: "en_US",
       type: "website"
     },
