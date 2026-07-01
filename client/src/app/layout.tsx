@@ -8,22 +8,26 @@ import AuthModal from "@/components/auth/AuthModal";
 
 import ContextProvider from "@/context/ContextProvider";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://chess.dtfseeds.com";
+
 export const metadata = {
-  title: "chessu",
-  description: "Play Chess online.",
+  title: "Kush Kings Chess | THC Chess",
+  description:
+    "Play Kush Kings Chess, a cannabis-themed online chess arena by THC - Teaching Healthy Cultivation.",
   openGraph: {
-    title: "chessu",
-    description: "Play Chess online.",
-    url: "https://ches.su",
-    siteName: "chessu",
+    title: "Kush Kings Chess | THC Chess",
+    description:
+      "A clean cannabis-themed online chess arena built for the DTF Seeds games hub.",
+    url: siteUrl,
+    siteName: "Kush Kings Chess",
     locale: "en_US",
     type: "website"
   },
   robots: {
     index: true,
-    follow: false,
-    nocache: true,
-    noarchive: true
+    follow: true,
+    nocache: false,
+    noarchive: false
   },
   icons: {
     icon: [
@@ -33,7 +37,7 @@ export const metadata = {
     apple: { url: "/apple-touch-icon.png", sizes: "180x180" }
   },
   manifest: "/site.webmanifest",
-  metadataBase: new URL(process.env.VERCEL ? "https://ches.su" : "http://localhost:3000")
+  metadataBase: new URL(siteUrl)
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -57,9 +61,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           id="load-theme"
           dangerouslySetInnerHTML={{
             __html: `if (localStorage.theme === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-              document.documentElement.setAttribute("data-theme", "chessuDark");
+              document.documentElement.setAttribute("data-theme", "kushKingsDark");
           } else {
-              document.documentElement.setAttribute("data-theme", "chessuLight");
+              document.documentElement.setAttribute("data-theme", "kushKingsLight");
           }`
           }}
         ></script>
