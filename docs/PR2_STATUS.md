@@ -23,19 +23,20 @@ Completed:
 - Rebranded create and join flows.
 - Added Kush Kings daisyUI theme.
 - Added original SVG brand mark.
-- Added original placeholder SVG chess piece pack.
+- Added original cannabis-themed SVG chess piece pack.
 - Added asset registry in `client/src/kushTheme.ts`.
-- Added stored GamePage patch and apply script.
+- Patched the live `GamePage.tsx` to use configurable URLs, branded copy, Kush board colors, custom pieces, and drag-safe animations.
+- Patched the archived board to use the same custom pieces and board colors.
+- Kept the old GamePage patch and apply script as historical reference only.
+- Added production container, Nginx, and systemd deployment examples.
 
 Still required before merge/release:
 
-- Apply `scripts/apply-gamepage-patch.sh` locally or through an editor that can modify `GamePage.tsx`.
-- Commit the changed `client/src/components/game/GamePage.tsx`.
-- Confirm CI passes.
-- Merge PR #2.
+- Confirm the required lint and build checks pass.
+- Review and merge PR #2.
+- Provision production DNS, TLS, PostgreSQL, and secrets.
 
 Next after merge:
 
-- Wire `KUSH_PIECE_ASSETS` into the `react-chessboard` `customPieces` prop.
-- Replace placeholder pieces with polished final art if needed.
 - Deploy frontend and backend with the production env values.
+- Link or embed `https://chess.dtfseeds.com` from the DTF Seeds games hub.

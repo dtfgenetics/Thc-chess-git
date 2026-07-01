@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="22" fill="#123D23"/><circle cx="64" cy="63" r="35" fill="#F5E7C8" opacity=".08"/><path d="M38 101h52l-5 13H43l-5-13Z" fill="#D4A017"/><ellipse cx="64" cy="59" rx="23" ry="35" fill="#F5E7C8"/><path d="M48 87c25-21 25-45 0-66M80 87c-25-21-25-45 0-66" fill="none" stroke="#123D23" stroke-width="5" stroke-linecap="round"/><path d="M50 37h28M49 52h30M50 67h28" stroke="#D4A017" stroke-width="4" stroke-linecap="round"/><circle cx="64" cy="22" r="8" fill="#D4A017"/><path d="M64 36c-9 6-12 13-9 21 6-2 10-6 12-12 4 5 9 8 16 8-2-9-8-15-19-17Z" fill="#4CAF50"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Dark Breeder bishop</title>
+  <g stroke="#F5E7C8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#123D23" d="M31 108h66l-7-16H38z"/>
+    <path fill="#123D23" d="M43 92c-2-21 6-35 21-45 15 10 23 24 21 45z"/>
+    <path fill="#123D23" d="M64 12c-15 13-22 25-20 37h40c2-12-5-24-20-37z"/>
+    <path d="M53 28c17 9 17 21 0 30s-17 21 0 30m22-60c-17 9-17 21 0 30s17 21 0 30M53 38h22M51 58h26M53 78h22" fill="none" stroke="#4CAF50"/>
+    <path fill="#4CAF50" d="M64 12c-7 4-10 9-8 15 5-1 8-4 10-8 3 3 7 5 12 4-2-6-6-9-14-11z"/>
+    <circle cx="43" cy="68" r="3" fill="#D4A017" stroke="none"/>
+    <circle cx="87" cy="61" r="3" fill="#D4A017" stroke="none"/>
+  </g>
+</svg>

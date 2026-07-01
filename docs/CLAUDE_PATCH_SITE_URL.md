@@ -156,3 +156,7 @@ Then test:
 3. Confirm it uses `NEXT_PUBLIC_SITE_URL` or local origin.
 4. Confirm browser title says `Kush Kings Chess`, not `chessu`.
 5. Confirm archive display no longer says `ches.su`.
+# Historical GamePage Patch Reference
+
+> Archived reference only. `client/src/components/game/GamePage.tsx` is already patched on
+> `fix/site-url-config`; do not apply these instructions during normal deployment.

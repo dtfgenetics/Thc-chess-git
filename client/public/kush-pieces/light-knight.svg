@@ -1,1 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="22" fill="#F5E7C8"/><circle cx="64" cy="64" r="35" fill="#123D23" opacity=".08"/><path d="M36 101h58l-6 13H42l-6-13Z" fill="#D4A017"/><path d="M41 93c2-32 17-56 43-72l19 18-12 10 10 16-14 28H41Z" fill="#123D23"/><circle cx="78" cy="42" r="5" fill="#F5E7C8"/><path d="M38 84c18-5 34-15 48-31" fill="none" stroke="#D4A017" stroke-width="6" stroke-linecap="round"/><path d="M35 76c12-12 24-16 37-12" fill="none" stroke="#F5E7C8" stroke-width="5" stroke-linecap="round"/><path d="M50 60c-10-5-17-4-22 4 8 5 15 4 22-4Z" fill="#2E7D32"/><path d="M88 61c9-7 17-7 23-1-7 7-15 8-23 1Z" fill="#2E7D32"/><path d="M93 38 108 27" stroke="#D4A017" stroke-width="5" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Light Rolling Knight</title>
+  <g stroke="#123D23" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#F5E7C8" d="M29 108h72l-8-16H37z"/>
+    <path fill="#F5E7C8" d="M39 92c1-24 9-44 27-61l-5-18 24 13 18 21-13 12 7 33z"/>
+    <path d="M49 82c12-3 24-12 36-28M65 31l18 10" fill="none"/>
+    <circle cx="81" cy="38" r="4" fill="#123D23" stroke="none"/>
+    <path fill="#2E7D32" d="M57 54c-10-7-19-7-26 1 8 8 17 8 26-1zm25 13c10-7 19-7 26 1-8 8-17 8-26-1z"/>
+    <path fill="#F5E7C8" d="M31 72l54-28 6 11-54 28z" stroke="#D4A017"/>
+    <path d="M31 72l6 11" stroke="#B43A2E" stroke-width="7"/>
+  </g>
+</svg>

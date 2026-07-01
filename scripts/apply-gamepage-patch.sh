@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Historical recovery helper only. The live GamePage patch is already present on
+# fix/site-url-config and this script should normally exit without changing files.
+
 PATCH_FILE="patches/0001-site-url-config-gamepage-patch.patch"
 GAME_PAGE="client/src/components/game/GamePage.tsx"
 
@@ -10,7 +13,7 @@ if [[ ! -f "$PATCH_FILE" ]]; then
 fi
 
 if ! grep -q "ches.su\|chessu" "$GAME_PAGE"; then
-  echo "GamePage patch already appears to be applied."
+  echo "Historical GamePage patch is already applied; no action required."
   exit 0
 fi
 

@@ -24,10 +24,15 @@ declare module "http" {
 }
 
 const isProduction = process.env.NODE_ENV === "production";
+const sessionSecret = process.env.SESSION_SECRET;
+
+if (isProduction && !sessionSecret) {
+    throw new Error("SESSION_SECRET is required when NODE_ENV=production");
+}
 
 const sessionMiddleware = session({
     store: new PGSession({ pool: db, createTableIfMissing: true }),
-    secret: process.env.SESSION_SECRET || "make sure to change this!",
+    secret: sessionSecret || "local-development-only-change-me",
     resave: false,
     saveUninitialized: false,
     name: process.env.SESSION_COOKIE_NAME || "kush_kings_chess",

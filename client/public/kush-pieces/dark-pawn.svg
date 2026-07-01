@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="22" fill="#123D23"/><circle cx="64" cy="39" r="17" fill="#F5E7C8"/><rect x="53" y="56" width="22" height="42" rx="10" fill="#F5E7C8"/><rect x="40" y="101" width="48" height="13" fill="#D4A017"/><path d="M65 67c-15-11-25-11-32 0 13 9 23 9 32 0Z" fill="#4CAF50"/><path d="M63 67c15-11 25-11 32 0-13 9-23 9-32 0Z" fill="#4CAF50"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Dark Seedling pawn</title>
+  <g stroke="#F5E7C8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#123D23" d="M31 108h66l-7-16H38z"/>
+    <path fill="#D4A017" d="M42 91c3-14 11-22 22-22s19 8 22 22z"/>
+    <path d="M64 76V35" fill="none" stroke="#4CAF50" stroke-width="7"/>
+    <path fill="#4CAF50" d="M61 49c-14-12-27-13-38-2 11 12 24 13 38 2zm6 0c14-12 27-13 38-2-11 12-24 13-38 2zM64 38c-7-11-7-20 0-28 8 8 8 17 0 28z"/>
+    <path fill="#123D23" d="M45 79c5-7 11-10 19-10l-7 18zm38 0c-5-7-11-10-19-10l7 18z"/>
+    <path d="M50 92l14-8 14 8" fill="none"/>
+  </g>
+</svg>

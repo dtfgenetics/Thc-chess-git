@@ -31,3 +31,7 @@ After editing:
 3. Report any errors clearly.
 4. Commit the changes to fix/site-url-config.
 ```
+# Historical Continuation Prompt
+
+> Archived reference only. The live GamePage work described below has already been completed
+> on `fix/site-url-config`; this file is retained to explain the earlier handoff.

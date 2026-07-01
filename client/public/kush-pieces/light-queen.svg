@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="22" fill="#F5E7C8"/><circle cx="64" cy="64" r="38" fill="#2E7D32" opacity=".10"/><path d="M34 102h60l-6 12H40l-6-12Z" fill="#D4A017"/><path d="M64 18c-28 19-38 44-29 74 18-5 31-16 38-34 12 16 29 24 52 25-5-30-25-52-61-65Z" fill="#2E7D32"/><path d="M64 19c-8 28-8 53 0 78" fill="none" stroke="#123D23" stroke-width="7" stroke-linecap="round"/><path d="M42 47c14 1 26 6 36 17M86 47c-13 1-24 6-33 17" fill="none" stroke="#F5E7C8" stroke-width="4" stroke-linecap="round"/><circle cx="64" cy="20" r="6" fill="#D4A017"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Light Mother Plant queen</title>
+  <g stroke="#123D23" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#F5E7C8" d="M31 108h66l-6-18H37z"/>
+    <path fill="#D4A017" d="M39 90h50l5-12H34z"/>
+    <path d="M64 84V36" fill="none" stroke="#2E7D32" stroke-width="7"/>
+    <path fill="#2E7D32" d="M64 40C55 25 50 18 45 14c-2 13 2 23 12 30-12-8-22-9-31-4 7 11 17 16 30 14-11 2-18 8-21 18 11 3 20-1 27-12 7 11 16 15 27 12-3-10-10-16-21-18 13 2 23-3 30-14-9-5-19-4-31 4 10-7 14-17 12-30-5 4-10 11-15 26z"/>
+    <path d="M64 39v40M44 44l18 10m22-10L66 54M45 65l17-7m21 7-17-7" fill="none" stroke="#F5E7C8" stroke-width="3"/>
+    <circle cx="64" cy="13" r="6" fill="#D4A017"/>
+    <circle cx="48" cy="20" r="4" fill="#D4A017"/>
+    <circle cx="80" cy="20" r="4" fill="#D4A017"/>
+  </g>
+</svg>

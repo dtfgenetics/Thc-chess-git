@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="22" fill="#F5E7C8"/><circle cx="64" cy="64" r="36" fill="#123D23" opacity=".08"/><rect x="34" y="40" width="60" height="60" rx="7" fill="#123D23"/><rect x="28" y="26" width="72" height="18" rx="4" fill="#123D23"/><rect x="39" y="101" width="50" height="13" fill="#D4A017"/><path d="M42 55h44M42 72h44M42 89h44" stroke="#D4A017" stroke-width="5" stroke-linecap="round"/><path d="M51 37h8v-9h10v9h8v-9h10v9" fill="none" stroke="#F5E7C8" stroke-width="5" stroke-linecap="round"/><path d="M64 56c-9 7-12 15-8 24 6-2 10-7 12-14 4 6 10 9 18 9-2-10-9-16-22-19Z" fill="#2E7D32"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Light Grow Tower rook</title>
+  <g stroke="#123D23" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#F5E7C8" d="M25 108h78l-7-15H32z"/>
+    <path fill="#F5E7C8" d="M35 24h58v69H35z"/>
+    <path fill="#D4A017" d="M29 16h70v13H29z"/>
+    <path d="M41 45h46M41 67h46M41 89h46" fill="none" stroke="#D4A017"/>
+    <path fill="#2E7D32" d="M51 43c-7-6-13-6-18 0 6 6 12 6 18 0zm0 22c-7-6-13-6-18 0 6 6 12 6 18 0zm26-22c7-6 13-6 18 0-6 6-12 6-18 0zm0 22c7-6 13-6 18 0-6 6-12 6-18 0z"/>
+    <path d="M64 31v56M52 83h24" fill="none" stroke="#2E7D32"/>
+  </g>
+</svg>

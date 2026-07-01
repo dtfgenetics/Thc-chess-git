@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="22" fill="#F5E7C8"/><circle cx="64" cy="64" r="35" fill="#123D23" opacity=".07"/><rect x="41" y="101" width="46" height="13" fill="#D4A017"/><path d="M62 50c-17-13-30-12-39 1 14 12 27 11 39-1Z" fill="#2E7D32"/><path d="M66 50c17-13 30-12 39 1-14 12-27 11-39-1Z" fill="#2E7D32"/><path d="M64 48v49" stroke="#123D23" stroke-width="9" stroke-linecap="round"/><circle cx="64" cy="37" r="13" fill="#123D23"/><path d="M52 78c8-7 16-8 24-3M50 91h28" fill="none" stroke="#D4A017" stroke-width="5" stroke-linecap="round"/><circle cx="82" cy="31" r="4" fill="#D4A017"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Light Seedling pawn</title>
+  <g stroke="#123D23" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#F5E7C8" d="M31 108h66l-7-16H38z"/>
+    <path fill="#D4A017" d="M42 91c3-14 11-22 22-22s19 8 22 22z"/>
+    <path d="M64 76V35" fill="none" stroke="#2E7D32" stroke-width="7"/>
+    <path fill="#2E7D32" d="M61 49c-14-12-27-13-38-2 11 12 24 13 38 2zm6 0c14-12 27-13 38-2-11 12-24 13-38 2zM64 38c-7-11-7-20 0-28 8 8 8 17 0 28z"/>
+    <path fill="#F5E7C8" d="M45 79c5-7 11-10 19-10l-7 18zm38 0c-5-7-11-10-19-10l7 18z"/>
+    <path d="M50 92l14-8 14 8" fill="none"/>
+  </g>
+</svg>

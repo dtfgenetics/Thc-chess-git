@@ -1,6 +1,7 @@
 {
     "name": "kush-kings-chess",
     "private": "true",
+    "packageManager": "pnpm@9.15.9",
     "author": "DTF Seeds / THC - Teaching Healthy Cultivation; forked from dotnize/chessu",
     "license": "MIT",
     "scripts": {

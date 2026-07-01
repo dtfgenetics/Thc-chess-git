@@ -1,83 +1,66 @@
-<h1 align="center">
-  <img src="./assets/chessu.png" alt="chessu" height="128" />
-</h1>
-<p align="center">
-  <a href="https://ches.su">
-    <img src="https://img.shields.io/github/deployments/dotnize/chessu/Production?label=deployment&style=for-the-badge&color=blue" alt="ches.su" />
-  </a>
-  <img src="https://img.shields.io/github/last-commit/dotnize/chessu?style=for-the-badge" alt="Last commit" />
-</p>
+# Kush Kings Chess
 
-<p align="center">Yet another Chess web app.
+Kush Kings Chess is the real-time multiplayer chess room for the DTF Seeds games hub. It keeps
+standard chess rules and persistence while presenting the board as light side versus dark side
+with original cannabis-themed pieces.
 
-<p align="center">
-  <img src="./assets/demo.jpg" alt="chessu" width="640" />
-</p>
+Production targets:
 
-- play against other users in real-time
-- spectate and chat in ongoing games with other users
-- _optional_ user accounts for tracking stats and game history
-- ~~play solo against Stockfish~~ (wip)
-- mobile-friendly
-- ... and more ([view roadmap](https://github.com/users/dotnize/projects/2))
+- Frontend: `https://chess.dtfseeds.com`
+- API and Socket.io: `https://chess-api.dtfseeds.com`
+- Parent hub: `https://dtfseeds.com`
 
-Built with Next.js 14, Tailwind CSS + daisyUI, react-chessboard, chess.js, Express.js, socket.io and PostgreSQL.
+## Features
+
+- Legal move validation with `chess.js`
+- Real-time create/join rooms through Socket.io
+- Spectator mode and room chat
+- Guest or registered player sessions
+- PostgreSQL-backed games, profiles, and archives
+- Replayable archived matches
+- Responsive Kush Kings board and custom SVG pieces
 
 ## Development
 
-> Node.js 20 or newer is recommended.
+Node.js 20 or newer and pnpm 9 are recommended.
 
-This project is structured as a monorepo using **pnpm** workspaces, separated into three packages:
-
-- `client` - Next.js application for the front-end, ~~deployed to ches.su via Vercel~~.
-- `server` - Node/Express.js application for the back-end, ~~deployed to server.ches.su via Railway~~.
-- `types` - Shared type definitions required by the client and server.
-
-### Getting started
-
-1. Install [pnpm](https://pnpm.io/installation).
-2. Install the necessary dependencies by running `pnpm install` in the root directory of the project.
-3. In the `server` directory, create a `.env` file for your PostgreSQL database. You can try [ElephantSQL](https://www.elephantsql.com/) or [Aiven](https://aiven.io/postgresql) for a free hosted database.
-   ```env
-   PGHOST=db.example.com
-   PGUSER=exampleuser
-   PGPASSWORD=examplepassword
-   PGDATABASE=chessu
-   ```
-4. Run the development servers with `pnpm dev`.
-   - To run the frontend and backend servers separately, use `pnpm dev:client` and `pnpm dev:server`, respectively.
-5. You can now access the frontend at http://localhost:3000 and the backend at http://localhost:3001.
-
-## Running chessu with Docker
-
-To build the project with Docker, you can use the provided `Dockerfile`.
-```sh
-docker build -t chessu .
+```bash
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-This command will build the Docker image with the name `chessu`. You can then run the image with the following command:
-```sh
-docker run -p 3000:3000 -p 3001:3001 chessu
+The frontend runs at `http://localhost:3000` and the backend at
+`http://localhost:3001`. Configure PostgreSQL through the `PG*` environment variables before
+starting the backend.
+
+Required release checks:
+
+```bash
+pnpm check:rebrand
+pnpm --filter client lint
+pnpm build:client
+pnpm build:server
 ```
 
-Once built, to start the project with POSTGRES, you can use the provided `docker-compose.yml` file.
-```sh
-docker-compose up
-```
-Please make sure to modify the values in the `server/.env` file to match the values in the `docker-compose.yml` file or vice versa.
+## Containers
 
-The entrypoint for the Docker image is set to run pnpm.
-The Dockerfile's `CMD` instruction is set to run the project in production mode. 
-If you want to run the project in development mode, you can override the `CMD` instruction by running the following command:
-```sh
-docker run -p 3000:3000 -p 3001:3001 chessu dev # runs both client and server in development mode
-docker run -p 3000:3000 -p 3001:3001 chessu dev:client # runs only the client in development mode
-docker run -p 3000:3000 -p 3001:3001 chessu dev:server # runs only the server in development mode
-```
-## Contributing
+For a local production-like stack with PostgreSQL:
 
-Please read our [Contributing Guidelines](./CONTRIBUTING.md) before starting a pull request.
+```bash
+docker compose up --build
+```
+
+Production uses separate client and server images through `docker-compose.production.yml`.
+Follow [docs/DTFSEEDS_DEPLOYMENT.md](docs/DTFSEEDS_DEPLOYMENT.md); do not deploy this application
+as a static-only site.
+
+## Repository layout
+
+- `client` — Next.js frontend
+- `server` — Express + Socket.io backend
+- `types` — shared TypeScript models
+- `deploy` — Nginx and systemd production examples
 
 ## License
 
-[MIT](./LICENSE)
+[MIT](LICENSE)

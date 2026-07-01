@@ -15,18 +15,11 @@
 
 @keyframes kush-piece-settle {
   0% {
-    opacity: 0.72;
-    transform: translateY(-4px) scale(0.96);
+    opacity: 0.76;
     filter: drop-shadow(0 0 0 rgba(212, 160, 23, 0));
-  }
-  70% {
-    opacity: 1;
-    transform: translateY(1px) scale(1.03);
-    filter: drop-shadow(0 4px 8px rgba(212, 160, 23, 0.24));
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.22));
   }
 }
@@ -41,85 +34,23 @@
   }
 }
 
-@keyframes kush-terp-float {
-  0%,
-  100% {
-    opacity: 0.42;
-    transform: translateY(0) rotate(-8deg) scale(1);
-  }
-  50% {
-    opacity: 0.82;
-    transform: translateY(-3px) rotate(8deg) scale(1.08);
-  }
-}
-
 .kush-piece {
-  animation: kush-piece-settle 180ms ease-out both;
-  border-radius: 18%;
-  position: relative;
-  transition:
-    transform 140ms ease,
-    filter 140ms ease;
-  will-change: transform, filter;
-}
-
-.kush-piece::after {
-  align-items: center;
-  background: radial-gradient(circle, rgba(212, 160, 23, 0.24), rgba(46, 125, 50, 0.08) 62%, transparent 70%);
-  border: 1px solid rgba(212, 160, 23, 0.18);
-  border-radius: 999px;
-  color: rgba(212, 160, 23, 0.72);
-  content: "✦";
-  display: flex;
-  font-size: 18%;
-  font-weight: 900;
-  height: 28%;
-  justify-content: center;
-  line-height: 1;
+  animation: kush-piece-settle 160ms ease-out both;
   pointer-events: none;
-  position: absolute;
-  right: 7%;
-  top: 7%;
-  width: 28%;
-}
-
-.kush-piece::before {
-  background:
-    radial-gradient(ellipse at center, rgba(76, 175, 80, 0.32) 0 36%, transparent 38%),
-    linear-gradient(90deg, transparent 45%, rgba(245, 231, 200, 0.48) 45% 55%, transparent 55%);
-  border-radius: 999px 999px 999px 0;
-  bottom: 8%;
-  content: "";
-  height: 20%;
-  left: 8%;
-  opacity: 0.72;
-  pointer-events: none;
-  position: absolute;
-  transform: rotate(-28deg);
-  width: 26%;
-}
-
-.kush-piece:hover {
-  transform: translateY(-2px) scale(1.04);
-  filter: drop-shadow(0 6px 12px rgba(212, 160, 23, 0.34));
-}
-
-.kush-piece:hover::after {
-  animation: kush-terp-float 1.4s ease-in-out infinite;
+  user-select: none;
+  will-change: opacity, filter;
 }
 
 .kush-piece--active {
   animation:
-    kush-piece-settle 180ms ease-out both,
+    kush-piece-settle 160ms ease-out both,
     kush-piece-glow 1.8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .kush-piece,
-  .kush-piece--active,
-  .kush-piece:hover::after {
+  .kush-piece--active {
     animation: none;
-    transition: none;
   }
 }
 
