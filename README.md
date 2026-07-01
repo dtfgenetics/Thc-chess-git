@@ -115,9 +115,9 @@ deployed as a static-only site.
 
 ## Upstream attribution and license
 
-Original project: `dotnize/chessu`  
-Original author: `dotnize`  
-Original license: MIT
+- Original project: `dotnize/chessu`
+- Original author: `dotnize`
+- Original license: MIT
 
 This fork preserves the upstream MIT license: [LICENSE](LICENSE).
 
