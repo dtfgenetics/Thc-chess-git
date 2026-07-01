@@ -7,6 +7,10 @@ import { activeGames } from "../db/models/game.model.js";
 import UserModel from "../db/models/user.model.js";
 import { io } from "../server.js";
 
+function duplicateLabel(label: "Username" | "Email") {
+    return label === "Username" ? "Grower name" : "Email";
+}
+
 export const getCurrentSession = async (req: Request, res: Response) => {
     try {
         if (req.session.user) {
@@ -111,7 +115,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const duplicateUsers = await UserModel.findByNameEmail({ name, email: compareEmail });
         if (duplicateUsers && duplicateUsers.length) {
             const dupl = duplicateUsers[0].name === name ? "Username" : "Email";
-            res.status(409).json({ message: `${dupl} is already in use.` });
+            res.status(409).json({ message: `${duplicateLabel(dupl)} is already in use.` });
             return;
         }
 
@@ -175,7 +179,7 @@ export const loginUser = async (req: Request, res: Response) => {
             true
         );
         if (!users || !users.length) {
-            res.status(404).json({ message: "Invalid username/email." });
+            res.status(404).json({ message: "Invalid grower name/email." });
             return;
         }
 
@@ -262,7 +266,7 @@ export const updateUser = async (req: Request, res: Response) => {
             duplicateUsers[0].id !== req.session.user.id
         ) {
             const dupl = duplicateUsers[0].name === name ? "Username" : "Email";
-            res.status(409).json({ message: `${dupl} is already in use.` });
+            res.status(409).json({ message: `${duplicateLabel(dupl)} is already in use.` });
             return;
         }
 
