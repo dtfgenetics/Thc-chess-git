@@ -1,0 +1,20 @@
+Shared hosting branch status:
+
+Branch php-shared-hosting-build is ahead of main and contains the Hostinger PHP/MySQL starter build.
+
+Committed:
+- database schema
+- PHP API bootstrap
+- create room endpoint
+- join room endpoint
+- public game state endpoint
+- move endpoint
+- send message endpoint
+- base HTML
+- base CSS
+
+Remaining:
+- frontend JavaScript file
+- fuller Hostinger setup instructions
+- hub snippet
+- live upload and testing
