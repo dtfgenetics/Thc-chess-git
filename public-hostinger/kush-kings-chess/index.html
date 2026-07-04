@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kush Kings Chess | DTF Seeds</title>
+  <meta name="description" content="Create a Kush Kings Chess room, invite another grower, or watch a live THC chess board." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero-card">
+      <div class="brand-mark" aria-hidden="true">♔</div>
+      <div>
+        <p class="eyebrow">DTF Seeds Game Room</p>
+        <h1>Kush Kings Chess</h1>
+        <p class="lede">Create a match, invite another grower, or watch a live board.</p>
+      </div>
+    </section>
+
+    <section class="lobby-card" id="lobby">
+      <label>
+        Grower name
+        <input id="playerName" maxlength="80" placeholder="Grower" autocomplete="nickname" />
+      </label>
+      <div class="button-row">
+        <button id="createGame">Create Match</button>
+        <input id="roomInput" maxlength="12" placeholder="Room code" />
+        <button id="joinGame">Join</button>
+      </div>
+      <p class="small-note">This shared-hosting build uses PHP/MySQL polling so it can run on Hostinger without VPS, Node, Socket.io, or PostgreSQL.</p>
+    </section>
+
+    <section class="game-layout hidden" id="gameLayout">
+      <aside class="panel">
+        <h2>Grow Room</h2>
+        <p><strong>Room:</strong> <span id="roomCode">—</span></p>
+        <p><strong>Your seat:</strong> <span id="playerSide">—</span></p>
+        <p><strong>Turn:</strong> <span id="turnText">—</span></p>
+        <p><strong>Status:</strong> <span id="statusText">—</span></p>
+        <button id="copyInvite">Copy Invite Link</button>
+        <p id="notice" class="notice"></p>
+      </aside>
+
+      <section class="board-wrap">
+        <div id="board" class="board" aria-label="Kush Kings chess board"></div>
+      </section>
+
+      <aside class="panel chat-panel">
+        <h2>Room Chat</h2>
+        <div id="chatLog" class="chat-log"></div>
+        <div class="chat-form">
+          <input id="chatInput" maxlength="500" placeholder="Send a grow-room message" />
+          <button id="sendChat">Send</button>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
