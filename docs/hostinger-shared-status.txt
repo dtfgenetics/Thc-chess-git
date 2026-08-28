@@ -1,0 +1,39 @@
+Shared hosting branch status:
+
+Branch php-shared-hosting-build is ahead of main and contains the Hostinger PHP/MySQL starter build.
+
+Committed:
+- database schema
+- PHP API bootstrap
+- create room endpoint
+- join room endpoint
+- public game state endpoint
+- move endpoint
+- send message endpoint
+- base HTML
+- base CSS
+- PHP fallback play page
+- PHP create-room form
+- PHP open-room form
+- PHP join-dark-side form
+- PHP board renderer from FEN
+- PHP manual move form
+
+What works after Hostinger upload and DB config:
+- create a room
+- open a room by code
+- join the dark side
+- render the current board
+- enter manual moves like e2 to e4
+- save moves into MySQL
+- update the FEN and move text
+
+Remaining:
+- frontend JavaScript drag-and-drop file
+- fuller Hostinger setup instructions
+- hub snippet
+- live upload and testing
+
+Known limitation:
+- manual PHP moves are a fallback, not the final polished UI.
+- move validation is basic and should be upgraded with browser chess.js or server-side legal move validation before public launch.
