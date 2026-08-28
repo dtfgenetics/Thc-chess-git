@@ -58,6 +58,9 @@ jobs:
       - name: Build server
         run: pnpm build:server
 
+      - name: Verify player seat ownership
+        run: node server/scripts/verify-player-seat.mjs
+
   hostinger-shared-hosting-checks:
     runs-on: ubuntu-latest
 
