@@ -1,4 +1,4 @@
-name: CI
+name: Kush Kings Chess CI
 
 on:
   pull_request:
@@ -9,10 +9,12 @@ on:
       - main
       - fix/site-url-config
 
+permissions:
+  contents: read
+
 jobs:
   client-checks:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,10 +22,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -37,8 +41,33 @@ jobs:
       - name: Build client
         run: pnpm build:client
 
+      - name: Validate public runtime contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const contract = JSON.parse(fs.readFileSync('deploy/runtime-contract.json', 'utf8'));
+          if (contract.frontend !== 'https://chess.dtfseeds.com') throw new Error('Unexpected frontend target');
+          if (contract.api !== 'https://chess-api.dtfseeds.com') throw new Error('Unexpected API target');
+          if (!contract.requiresPostgres || !contract.requiresPersistentSessions) throw new Error('Database/session requirement cannot be removed');
+          if (contract.staticOnlyDeploymentSupported !== false) throw new Error('Kush Kings cannot become a static-only deployment');
+          NODE
+
   server-checks:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kush_kings_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d kush_kings_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
       - name: Checkout
@@ -47,16 +76,27 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build server
         run: pnpm build:server
+
+      - name: Verify production API, PostgreSQL session, and Socket.IO contract
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: kush_kings_test
+        run: pnpm test:production-runtime
 
   hostinger-shared-hosting-checks:
     runs-on: ubuntu-latest
