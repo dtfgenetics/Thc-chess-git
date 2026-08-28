@@ -4,6 +4,7 @@ import type { DisconnectReason, Socket } from "socket.io";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
 import { io } from "../server.js";
+import { userAlreadySeated } from "./playerSeat.js";
 
 // TODO: clean up
 
@@ -77,15 +78,14 @@ export async function leaveLobby(this: Socket, reason?: DisconnectReason, code?:
             game.white.disconnectedOn = Date.now();
         }
 
-        // count sockets
         const sockets = await io.in(game.code as string).fetchSockets();
 
         if (sockets.length <= 0 || (reason === undefined && sockets.length <= 1)) {
             if (game.timeout) clearTimeout(game.timeout);
 
-            let timeout = 1000 * 60; // 1 minute
+            let timeout = 1000 * 60;
             if (game.pgn) {
-                timeout *= 20; // 20 minutes if game has started
+                timeout *= 20;
             }
             game.timeout = Number(
                 setTimeout(() => {
@@ -206,7 +206,7 @@ export async function sendMove(this: Socket, m: { from: string; to: string; prom
                 }
                 game.endReason = reason;
 
-                const { id } = (await GameModel.save(game)) as Game; // save game to db
+                const { id } = (await GameModel.save(game)) as Game;
                 game.id = id;
                 io.to(game.code as string).emit("gameOver", { reason, winnerName, winnerSide, id });
 
@@ -226,10 +226,22 @@ export async function sendMove(this: Socket, m: { from: string; to: string; prom
 export async function joinAsPlayer(this: Socket) {
     const game = activeGames.find((g) => g.code === Array.from(this.rooms)[1]);
     if (!game) return;
-    const user = game.observers?.find((o) => o.id === this.request.session.user.id);
+
+    const userId = this.request.session.user.id;
+    if (userId === undefined) {
+        console.log("joinAsPlayer: session user has no id.");
+        return;
+    }
+    if (userAlreadySeated(userId, game.white, game.black)) {
+        console.log(`joinAsPlayer: ${this.request.session.user.name} is already seated.`);
+        this.emit("receivedLatestGame", game);
+        return;
+    }
+
+    const user = game.observers?.find((o) => o.id === userId);
     if (!game.white) {
         const sessionUser = {
-            id: this.request.session.user.id,
+            id: userId,
             name: this.request.session.user.name,
             connected: true
         };
@@ -242,7 +254,7 @@ export async function joinAsPlayer(this: Socket) {
         game.startedAt = Date.now();
     } else if (!game.black) {
         const sessionUser = {
-            id: this.request.session.user.id,
+            id: userId,
             name: this.request.session.user.name,
             connected: true
         };
