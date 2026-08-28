@@ -1,5 +1,6 @@
-type SeatOwner = { id: string } | null | undefined;
+type PlayerId = string | number;
+type SeatOwner = { id: PlayerId } | null | undefined;
 
-export function userAlreadySeated(userId: string, white: SeatOwner, black: SeatOwner): boolean {
+export function userAlreadySeated(userId: PlayerId, white: SeatOwner, black: SeatOwner): boolean {
     return white?.id === userId || black?.id === userId;
 }
