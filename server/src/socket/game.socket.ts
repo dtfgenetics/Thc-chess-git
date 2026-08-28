@@ -228,6 +228,10 @@ export async function joinAsPlayer(this: Socket) {
     if (!game) return;
 
     const userId = this.request.session.user.id;
+    if (userId === undefined) {
+        console.log("joinAsPlayer: session user has no id.");
+        return;
+    }
     if (userAlreadySeated(userId, game.white, game.black)) {
         console.log(`joinAsPlayer: ${this.request.session.user.name} is already seated.`);
         this.emit("receivedLatestGame", game);
