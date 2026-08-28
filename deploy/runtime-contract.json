@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "game": "kush-kings-chess",
+  "runtime": "nextjs-express-socketio-postgres",
+  "nodeVersion": 22,
+  "frontend": "https://chess.dtfseeds.com",
+  "api": "https://chess-api.dtfseeds.com",
+  "healthPath": "/health",
+  "apiPrefix": "/v1",
+  "socketPath": "/socket.io",
+  "requiresPostgres": true,
+  "requiresPersistentSessions": true,
+  "requiresWebSocketUpgrade": true,
+  "staticOnlyDeploymentSupported": false,
+  "sessionCookie": {
+    "name": "kush_kings_chess",
+    "domain": ".dtfseeds.com",
+    "httpOnly": true,
+    "secureInProduction": true,
+    "sameSiteInProduction": "none"
+  },
+  "publicOrigins": [
+    "https://chess.dtfseeds.com",
+    "https://dtfseeds.com",
+    "https://www.dtfseeds.com"
+  ],
+  "releaseGates": [
+    "pnpm check:rebrand",
+    "pnpm --filter client lint",
+    "pnpm build:client",
+    "pnpm build:server",
+    "pnpm test:production-runtime"
+  ]
+}
