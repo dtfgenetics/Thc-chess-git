@@ -57,3 +57,24 @@ jobs:
 
       - name: Build server
         run: pnpm build:server
+
+  hostinger-shared-hosting-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate PHP fallback syntax
+        run: |
+          find public-hostinger/kush-kings-chess -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Validate fallback browser helper
+        run: node --check public-hostinger/kush-kings-chess/js/fallback-polish.js
+
+      - name: Verify fallback assets are wired
+        run: |
+          grep -q 'js/fallback-polish.js' public-hostinger/kush-kings-chess/play.php
+          grep -q 'input\[name="from_sq"\]' public-hostinger/kush-kings-chess/js/fallback-polish.js
+          grep -q 'Copy Invite' public-hostinger/kush-kings-chess/js/fallback-polish.js
+          grep -q 'prefers-reduced-motion' public-hostinger/kush-kings-chess/css/style.css
