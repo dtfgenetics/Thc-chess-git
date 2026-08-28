@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'move'
 ?>
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kush Kings Chess PHP</title><link rel="stylesheet" href="css/style.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kush Kings Chess PHP</title><link rel="stylesheet" href="css/style.css"><script src="js/fallback-polish.js" defer></script></head>
 <body>
 <main class="app-shell">
 <section class="hero-card"><div class="brand-mark">♔</div><div><p class="eyebrow">DTF Seeds Game Room</p><h1>Kush Kings Chess</h1><p class="lede">Shared-hosting PHP fallback. No VPS. No Node. No new service.</p></div></section>
@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'move'
 <div class="square <?= $light ? 'light' : 'dark' ?>" title="<?= h(sq($r, $c)) ?>"><?php if ($p): ?><span class="piece <?= ctype_upper($p) ? 'light-side' : 'dark-side' ?>">☘<?= h(piece_label($p)) ?></span><?php endif; ?></div>
 <?php endforeach; endforeach; ?>
 </div></section>
-<aside class="panel"><h2>Moves</h2><form method="post"><input type="hidden" name="action" value="move"><input type="hidden" name="room_code" value="<?= h($game['room_code']) ?>"><label>From <input name="from_sq" maxlength="2" placeholder="e2"></label><label>To <input name="to_sq" maxlength="2" placeholder="e4"></label><p><button>Save Move</button></p></form><p><?= h((string)($game['pgn'] ?? 'No moves yet.')) ?></p><p class="small-note">Manual moves are the PHP-only fallback. Drag-and-drop remains a frontend follow-up.</p></aside>
+<aside class="panel"><h2>Moves</h2><form method="post"><input type="hidden" name="action" value="move"><input type="hidden" name="room_code" value="<?= h($game['room_code']) ?>"><label>From <input name="from_sq" maxlength="2" placeholder="e2"></label><label>To <input name="to_sq" maxlength="2" placeholder="e4"></label><p><button>Save Move</button></p></form><p><?= h((string)($game['pgn'] ?? 'No moves yet.')) ?></p><p class="small-note">Manual moves are the PHP-only fallback. Click a source square and destination square, or type coordinates directly.</p></aside>
 </section>
 <?php endif; ?>
 </main>
