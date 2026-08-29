@@ -61,6 +61,9 @@ jobs:
       - name: Verify player seat ownership
         run: node server/scripts/verify-player-seat.mjs
 
+      - name: Verify observer roster ownership
+        run: node server/scripts/verify-observer-roster.mjs
+
   hostinger-shared-hosting-checks:
     runs-on: ubuntu-latest
 
