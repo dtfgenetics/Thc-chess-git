@@ -32,10 +32,15 @@ export async function joinLobby(this: Socket, gameCode: string) {
             game.black.name = this.request.session.user.name;
         }
     } else {
-        game.observers = upsertObserver(game.observers, {
-            id: this.request.session.user.id,
-            name: this.request.session.user.name
-        });
+        const observerId = this.request.session.user.id;
+        if (observerId === undefined) {
+            console.log("joinLobby: session observer has no id; skipping observer roster entry.");
+        } else {
+            game.observers = upsertObserver(game.observers, {
+                id: observerId,
+                name: this.request.session.user.name
+            });
+        }
     }
 
     if (this.rooms.size >= 2) {
