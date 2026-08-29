@@ -1,12 +1,11 @@
-type ObserverId = string | number;
+import type { User } from "@chessu/types";
 
-type Observer = {
-    id: ObserverId;
-    name: string;
+type IdentifiedUser = User & {
+    id: NonNullable<User["id"]>;
 };
 
-export function upsertObserver(observers: Observer[] | undefined, user: Observer): Observer[] {
-    const next: Observer[] = [];
+export function upsertObserver(observers: User[] | undefined, user: IdentifiedUser): User[] {
+    const next: User[] = [];
     let inserted = false;
 
     for (const observer of observers ?? []) {
