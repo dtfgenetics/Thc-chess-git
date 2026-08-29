@@ -4,6 +4,7 @@ import type { DisconnectReason, Socket } from "socket.io";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
 import { io } from "../server.js";
+import { upsertObserver } from "./observerRoster.js";
 import { userAlreadySeated } from "./playerSeat.js";
 
 // TODO: clean up
@@ -31,12 +32,10 @@ export async function joinLobby(this: Socket, gameCode: string) {
             game.black.name = this.request.session.user.name;
         }
     } else {
-        if (game.observers === undefined) game.observers = [];
-        const user = {
+        game.observers = upsertObserver(game.observers, {
             id: this.request.session.user.id,
             name: this.request.session.user.name
-        };
-        game.observers?.push(user);
+        });
     }
 
     if (this.rooms.size >= 2) {
