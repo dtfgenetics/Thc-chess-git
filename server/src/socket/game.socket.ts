@@ -4,7 +4,7 @@ import type { DisconnectReason, Socket } from "socket.io";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
 import { io } from "../server.js";
-import { resolveResignationWinner } from "./gameResult.js";
+import { canOfferDraw, canRespondToDraw, resolveResignationWinner } from "./gameResult.js";
 import { upsertObserver } from "./observerRoster.js";
 import { userAlreadySeated } from "./playerSeat.js";
 
@@ -164,11 +164,10 @@ export async function offerDraw(this: Socket) {
     if (!game || game.endReason || game.winner || !game.pgn || !game.white || !game.black) return;
 
     const userId = this.request.session.user.id;
-    if (userId !== game.white.id && userId !== game.black.id) {
-        console.log(`offerDraw: session user is not seated in the active game.`);
+    if (!canOfferDraw(game, userId)) {
+        console.log(`offerDraw: invalid player or an offer is already pending.`);
         return;
     }
-    if (game.drawOfferFrom === userId) return;
 
     game.drawOfferFrom = userId;
     io.to(game.code as string).emit("drawOffered", {
@@ -182,11 +181,10 @@ export async function respondToDraw(this: Socket, accept: boolean) {
     if (!game || game.endReason || game.winner || !game.pgn || !game.white || !game.black) return;
 
     const userId = this.request.session.user.id;
-    if (userId !== game.white.id && userId !== game.black.id) {
-        console.log(`respondToDraw: session user is not seated in the active game.`);
+    if (!canRespondToDraw(game, userId)) {
+        console.log(`respondToDraw: invalid responder or no opponent offer is pending.`);
         return;
     }
-    if (game.drawOfferFrom === undefined || game.drawOfferFrom === userId) return;
 
     if (!accept) {
         game.drawOfferFrom = undefined;
