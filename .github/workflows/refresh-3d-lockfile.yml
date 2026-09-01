@@ -29,16 +29,8 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Apply live-board patch
-        run: |
-          if git apply --check patches/0003-3d-kush-kings-live-board.patch; then
-            git apply patches/0003-3d-kush-kings-live-board.patch
-          elif git apply --reverse --check patches/0003-3d-kush-kings-live-board.patch; then
-            echo "3D live-board patch is already applied"
-          else
-            echo "3D live-board patch does not apply cleanly"
-            exit 1
-          fi
+      - name: Integrate live 3D board
+        run: python scripts/apply-3d-gamepage.py
 
       - name: Lint client
         run: pnpm --filter client lint
