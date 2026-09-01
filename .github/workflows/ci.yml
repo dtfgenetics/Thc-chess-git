@@ -64,6 +64,12 @@ jobs:
       - name: Verify observer roster ownership
         run: node server/scripts/verify-observer-roster.mjs
 
+      - name: Verify resignation ownership
+        run: node server/scripts/verify-resignation.mjs
+
+      - name: Verify draw offer ownership
+        run: node server/scripts/verify-draw-offers.mjs
+
   hostinger-shared-hosting-checks:
     runs-on: ubuntu-latest
 
