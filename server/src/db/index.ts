@@ -1,6 +1,11 @@
 import pg from "pg";
 
-export const db = new pg.Pool();
+const databaseUrl = process.env.DATABASE_URL?.trim();
+
+// `pg` natively supports the traditional PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE
+// environment variables. Managed hosts such as Hostinger + Supabase commonly provide
+// one PostgreSQL connection string instead, so accept either production contract.
+export const db = new pg.Pool(databaseUrl ? { connectionString: databaseUrl } : undefined);
 
 export const INIT_TABLES = /* sql */ `
     CREATE TABLE IF NOT EXISTS "user" (
