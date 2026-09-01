@@ -37,7 +37,7 @@ if 'setConnectionState("connecting");\n    socket.connect();' not in game:
         1,
     )
 
-if 'setConnectionState,\n      setPlayBtnLoading' not in game:
+if '      setConnectionState,\n      setPlayBtnLoading\n' not in game:
     actions_anchor = '''      makeMove,
       setNavFen,
       setNavIndex
@@ -86,7 +86,7 @@ elif 'connectionState === "connected"' not in game:
     raise SystemExit("board status badge anchor not found")
 
 # Add compact room/role/spectator HUD above the secondary panel.
-if 'spectator' not in game.split('className="flex max-w-lg flex-1 flex-col items-center justify-center gap-4"', 1)[-1][:1200].lower():
+if 'Room {initialLobby.code}' not in game:
     panel_anchor = '''      <div className="flex max-w-lg flex-1 flex-col items-center justify-center gap-4">
         <div className="mb-auto flex w-full p-2">
 '''
@@ -125,7 +125,9 @@ socket_actions_new = '''        makeMove: Function;
         setConnectionState: Dispatch<SetStateAction<SocketConnectionState>>;
         setPlayBtnLoading: Dispatch<SetStateAction<boolean>>;
 '''
-if socket_actions_old in socket:
+if 'setConnectionState: Dispatch<SetStateAction<SocketConnectionState>>;' not in socket:
+    if socket_actions_old not in socket:
+        raise SystemExit("socket actions type anchor not found")
     socket = socket.replace(socket_actions_old, socket_actions_new, 1)
 
 connect_old = '''    socket.on("connect", () => {
