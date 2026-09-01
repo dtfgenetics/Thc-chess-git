@@ -32,6 +32,9 @@ jobs:
       - name: Apply draw offer flow
         run: python scripts/apply-draw-offers.py
 
+      - name: Apply play again actions
+        run: python scripts/apply-play-again.py
+
       - name: Check rebrand
         run: pnpm check:rebrand
 
@@ -53,14 +56,21 @@ jobs:
       - name: Verify draw offer ownership
         run: node server/scripts/verify-draw-offers.mjs
 
-      - name: Commit verified draw offer flow
+      - name: Verify completion UX markers
         run: |
-          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/socketEvents.ts server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts; then
-            echo "Draw offer flow is already committed"
+          grep -q 'Play Again / New Match' client/src/components/game/GamePage.tsx
+          grep -q 'Play Again / New Match' client/src/components/archive/ArchivedGame.tsx
+          grep -q 'Offer Draw' client/src/components/game/GamePage.tsx
+          grep -q 'Resign' client/src/components/game/GamePage.tsx
+
+      - name: Commit verified completion UX
+        run: |
+          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/archive/ArchivedGame.tsx client/src/components/game/socketEvents.ts server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts; then
+            echo "Completion UX is already committed"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add client/src/components/game/GamePage.tsx client/src/components/game/socketEvents.ts server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts
-          git commit -m "Add server-authoritative draw offers [skip interaction verify]"
+          git add client/src/components/game/GamePage.tsx client/src/components/archive/ArchivedGame.tsx client/src/components/game/socketEvents.ts server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts
+          git commit -m "Finish multiplayer completion controls [skip interaction verify]"
           git push
