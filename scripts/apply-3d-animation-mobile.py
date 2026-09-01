@@ -136,9 +136,10 @@ old_map = '''        {pieces.map((piece) => (
         ))}
 '''
 new_map = '''        {pieces.map((piece) => {
+          const moveSquares = lastMoveSquares ?? [];
           const animateFrom =
-            lastMoveSquares.length >= 2 && lastMoveSquares[1] === piece.square
-              ? (lastMoveSquares[0] as Square)
+            moveSquares.length >= 2 && moveSquares[1] === piece.square
+              ? (moveSquares[0] as Square)
               : undefined;
           return (
             <PieceActor
