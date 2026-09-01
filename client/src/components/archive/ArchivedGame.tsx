@@ -1,6 +1,8 @@
 "use client";
 
 import { SITE_URL } from "@/config";
+import CapturedPieces from "@/components/game/CapturedPieces";
+import ThreeChessBoard from "@/components/game/ThreeChessBoard";
 import { KUSH_BOARD_THEME, KUSH_PIECE_ASSETS } from "@/kushTheme";
 import type { CustomSquares } from "@/types";
 import { Game } from "@chessu/types";
@@ -19,6 +21,7 @@ import { Chessboard } from "react-chessboard";
 
 export default function ArchivedGame({ game }: { game: Game }) {
   const [boardWidth, setBoardWidth] = useState(480);
+  const [boardMode, setBoardMode] = useState<"3d" | "2d">("3d");
   const moveListRef = useRef<HTMLDivElement>(null);
   const [navFen, setNavFen] = useState<string | null>(null);
   const [navIndex, setNavIndex] = useState<number | null>(null);
@@ -71,7 +74,7 @@ export default function ArchivedGame({ game }: { game: Game }) {
     } else if (window.innerWidth >= 768) {
       setBoardWidth(480);
     } else {
-      setBoardWidth(350);
+      setBoardWidth(Math.min(350, Math.max(240, window.innerWidth - 24)));
     }
   }
 
@@ -247,20 +250,64 @@ export default function ArchivedGame({ game }: { game: Game }) {
   return (
     <div className="flex w-full flex-wrap justify-center gap-6 px-4 py-4 lg:gap-10 2xl:gap-16">
       <div className="h-min">
-        <Chessboard
-          boardWidth={boardWidth}
-          customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
-          customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
-          customPieces={customPieces}
-          position={navFen || actualGame.fen()}
-          boardOrientation={flipBoard ? "black" : "white"}
-          isDraggablePiece={() => false}
-          onSquareClick={() => updateCustomSquares({ rightClicked: {} })}
-          onSquareRightClick={onSquareRightClick}
-          customSquareStyles={{
-            ...getNavMoveSquares(),
-            ...customSquares.rightClicked
-          }}
+        <div className="mb-2 flex items-center justify-between gap-2" style={{ width: boardWidth }}>
+          <span className="text-xs opacity-70">Archived 3D replay</span>
+          <div className="join">
+            <button
+              type="button"
+              className={`btn join-item btn-xs ${boardMode === "3d" ? "btn-primary" : "btn-ghost"}`}
+              aria-pressed={boardMode === "3d"}
+              onClick={() => setBoardMode("3d")}
+            >
+              3D
+            </button>
+            <button
+              type="button"
+              className={`btn join-item btn-xs ${boardMode === "2d" ? "btn-primary" : "btn-ghost"}`}
+              aria-pressed={boardMode === "2d"}
+              onClick={() => setBoardMode("2d")}
+            >
+              2D
+            </button>
+          </div>
+        </div>
+
+        <div style={{ width: boardWidth, height: boardWidth }}>
+          {boardMode === "3d" ? (
+            <ThreeChessBoard
+              fen={navFen || actualGame.fen()}
+              orientation={flipBoard ? "black" : "white"}
+              disabled
+              lastMoveSquares={Object.keys(getNavMoveSquares() || {})}
+              markerSquares={Object.keys(customSquares.rightClicked)}
+              onSquareClick={() => undefined}
+              onSquareRightClick={onSquareRightClick}
+            />
+          ) : (
+            <Chessboard
+              boardWidth={boardWidth}
+              customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
+              customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
+              customPieces={customPieces}
+              position={navFen || actualGame.fen()}
+              boardOrientation={flipBoard ? "black" : "white"}
+              isDraggablePiece={() => false}
+              onSquareClick={() => updateCustomSquares({ rightClicked: {} })}
+              onSquareRightClick={onSquareRightClick}
+              customSquareStyles={{
+                ...getNavMoveSquares(),
+                ...customSquares.rightClicked
+              }}
+            />
+          )}
+        </div>
+
+        <CapturedPieces
+          history={
+            navIndex === null
+              ? actualGame.history({ verbose: true })
+              : actualGame.history({ verbose: true }).slice(0, navIndex + 1)
+          }
         />
       </div>
 
