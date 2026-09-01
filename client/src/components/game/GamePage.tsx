@@ -574,6 +574,12 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     };
   }
 
+  function resignMatch() {
+    if (lobby.side === "s" || lobby.endReason || lobby.winner || !lobby.pgn) return;
+    if (!window.confirm("Resign this match? Your opponent will receive the win.")) return;
+    socket.emit("resignGame");
+  }
+
   function claimAbandoned(type: "win" | "draw") {
     if (
       lobby.side === "s" ||
@@ -716,6 +722,11 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
             {lobby.side === "w" ? "Light player" : lobby.side === "b" ? "Dark player" : "Spectator"}
           </span>
           <span className="badge badge-outline">{lobby.observers?.length ?? 0} watching</span>
+          {lobby.side !== "s" && lobby.pgn && !lobby.endReason && !lobby.winner && (
+            <button type="button" className="btn btn-error btn-outline btn-xs" onClick={resignMatch}>
+              Resign
+            </button>
+          )}
         </div>
         <div className="mb-auto flex w-full p-2">
           <div className="flex flex-1 flex-col items-center justify-between">
@@ -804,8 +815,10 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
             <div className="bg-neutral absolute w-full rounded-t-lg bg-opacity-95 p-2">
               {lobby.endReason ? (
                 <div>
-                  {lobby.endReason === "abandoned"
-                    ? lobby.winner === "draw"
+                  {lobby.endReason === "resigned"
+                    ? `The match was won by ${lobby.winner} after resignation.`
+                    : lobby.endReason === "abandoned"
+                      ? lobby.winner === "draw"
                       ? `The match ended in an even harvest due to abandonment.`
                       : `The match was won by ${lobby.winner} due to abandonment.`
                     : lobby.winner === "draw"

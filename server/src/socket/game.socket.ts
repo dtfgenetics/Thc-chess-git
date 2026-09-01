@@ -4,6 +4,7 @@ import type { DisconnectReason, Socket } from "socket.io";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
 import { io } from "../server.js";
+import { resolveResignationWinner } from "./gameResult.js";
 import { upsertObserver } from "./observerRoster.js";
 import { userAlreadySeated } from "./playerSeat.js";
 
@@ -153,6 +154,39 @@ export async function claimAbandoned(this: Socket, type: "win" | "draw") {
     };
 
     io.to(game.code as string).emit("gameOver", gameOver);
+
+    if (game.timeout) clearTimeout(game.timeout);
+    activeGames.splice(activeGames.indexOf(game), 1);
+}
+
+export async function resignGame(this: Socket) {
+    const game = activeGames.find((g) => g.code === Array.from(this.rooms)[1]);
+    if (!game || game.endReason || game.winner || !game.pgn || !game.white || !game.black) return;
+
+    const winnerSide = resolveResignationWinner(game, this.request.session.user.id);
+    if (!winnerSide) {
+        console.log(`resignGame: session user is not seated in the active game.`);
+        return;
+    }
+
+    game.endReason = "resigned";
+    game.winner = winnerSide;
+
+    const saved = (await GameModel.save(game)) as Game | null;
+    if (!saved?.id) {
+        console.log(`resignGame: failed to persist game ${game.code}.`);
+        this.emit("receivedLatestGame", game);
+        return;
+    }
+    game.id = saved.id;
+
+    const winnerName = winnerSide === "white" ? game.white.name : game.black.name;
+    io.to(game.code as string).emit("gameOver", {
+        reason: game.endReason,
+        winnerName,
+        winnerSide,
+        id: game.id
+    });
 
     if (game.timeout) clearTimeout(game.timeout);
     activeGames.splice(activeGames.indexOf(game), 1);

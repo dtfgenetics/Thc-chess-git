@@ -94,6 +94,8 @@ export function initSocket(
                 } else {
                     m.message = `${winnerName} (${displaySide(winnerSide)}) claimed the win due to abandonment.`;
                 }
+            } else if (reason === "resigned") {
+                m.message = `Harvest complete: ${winnerName} (${displaySide(winnerSide)}) won after the other grower resigned.`;
             } else if (reason === "checkmate") {
                 m.message = `Harvest complete: ${winnerName} (${displaySide(winnerSide)}) won by checkmate.`;
             } else {

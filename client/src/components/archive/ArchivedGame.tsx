@@ -391,8 +391,10 @@ export default function ArchivedGame({ game }: { game: Game }) {
 
         <div className="relative h-60 w-full min-w-fit">
           <div className="bg-base-300 flex h-full w-full min-w-[64px] flex-col rounded-lg p-4 shadow-sm">
-            {game.endReason === "abandoned"
-              ? game.winner === "draw"
+            {game.endReason === "resigned"
+              ? `The match was won by ${game.winner} after resignation.`
+              : game.endReason === "abandoned"
+                ? game.winner === "draw"
                 ? "The match ended in an even harvest due to abandonment."
                 : `The match was won by ${game.winner} due to abandonment.`
               : game.winner === "draw"
