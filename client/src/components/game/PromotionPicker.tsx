@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable no-unused-vars */
 
 import { KUSH_PIECE_ASSETS } from "@/kushTheme";
 import type { Color, PieceSymbol } from "chess.js";
