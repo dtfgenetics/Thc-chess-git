@@ -1,0 +1,13 @@
+{
+    email admin@dtfseeds.com
+}
+
+chess.dtfseeds.com {
+    encode zstd gzip
+    reverse_proxy client:3000
+}
+
+chess-api.dtfseeds.com {
+    encode zstd gzip
+    reverse_proxy server:3001
+}
