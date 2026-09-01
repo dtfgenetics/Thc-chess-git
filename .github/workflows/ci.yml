@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - fix/site-url-config
+      - "feature/**"
 
 jobs:
   client-checks:
