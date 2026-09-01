@@ -27,10 +27,15 @@ import { KUSH_BOARD_THEME, KUSH_COPY, KUSH_PIECE_ASSETS } from "@/kushTheme";
 import { io } from "socket.io-client";
 
 import { lobbyReducer, squareReducer } from "./reducers";
-import { initSocket } from "./socketEvents";
+import { initSocket, type SocketConnectionState } from "./socketEvents";
 import { syncPgn, syncSide } from "./utils";
+import CapturedPieces from "./CapturedPieces";
+import PromotionPicker from "./PromotionPicker";
+import ThreeChessBoard from "./ThreeChessBoard";
 
 const socket = io(API_URL, { withCredentials: true, autoConnect: false });
+
+type PromotionPiece = "q" | "r" | "b" | "n";
 
 export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   const session = useContext(SessionContext);
@@ -50,6 +55,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
   const [moveFrom, setMoveFrom] = useState<string | Square | null>(null);
   const [boardWidth, setBoardWidth] = useState(480);
+  const [boardMode, setBoardMode] = useState<"3d" | "2d">("3d");
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
+  const [connectionState, setConnectionState] = useState<SocketConnectionState>("connecting");
   const chessboardRef = useRef<ClearPremoves>(null);
 
   const [navFen, setNavFen] = useState<string | null>(null);
@@ -119,6 +127,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
   useEffect(() => {
     if (!session?.user || !session.user?.id) return;
+    setConnectionState("connecting");
     socket.connect();
 
     window.addEventListener("resize", handleResize);
@@ -136,7 +145,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
       updateCustomSquares,
       makeMove,
       setNavFen,
-      setNavIndex
+      setNavIndex,
+      setConnectionState,
+      setPlayBtnLoading
     });
 
     return () => {
@@ -185,7 +196,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     } else if (window.innerWidth >= 768) {
       setBoardWidth(480);
     } else {
-      setBoardWidth(350);
+      setBoardWidth(Math.min(350, Math.max(240, window.innerWidth - 24)));
     }
   }
 
@@ -271,22 +282,53 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     return piece.startsWith(lobby.side) && !lobby.endReason && !lobby.winner;
   }
 
+  function needsPromotion(from: Square, to: Square) {
+    const piece = lobby.actualGame.get(from);
+    if (!piece || piece.type !== "p") return false;
+    const moves = lobby.actualGame.moves({ square: from, verbose: true }) as Move[];
+    return moves.some((move) => move.to === to && Boolean(move.promotion));
+  }
+
+  function sendMove(from: Square, to: Square, promotion?: PromotionPiece) {
+    const moveDetails = { from, to, ...(promotion ? { promotion } : {}) };
+    const move = makeMove(moveDetails);
+    if (!move) return false;
+    setMoveFrom(null);
+    socket.emit("sendMove", moveDetails);
+    return true;
+  }
+
+  function attemptMove(from: Square, to: Square) {
+    if (needsPromotion(from, to)) {
+      setPendingPromotion({ from, to });
+      updateCustomSquares({ options: {} });
+      return "promotion" as const;
+    }
+    return sendMove(from, to);
+  }
+
+  function choosePromotion(piece: PromotionPiece) {
+    if (!pendingPromotion) return;
+    const { from, to } = pendingPromotion;
+    setPendingPromotion(null);
+    sendMove(from, to, piece);
+  }
+
+  function cancelPromotion() {
+    setPendingPromotion(null);
+    setMoveFrom(null);
+    updateCustomSquares({ options: {} });
+  }
+
   function onDrop(sourceSquare: Square, targetSquare: Square) {
     if (lobby.side === "s" || navFen || lobby.endReason || lobby.winner) return false;
 
     // premove
     if (lobby.side !== lobby.actualGame.turn()) return true;
 
-    const moveDetails = {
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: "q"
-    };
-
-    const move = makeMove(moveDetails);
-    if (!move) return false; // illegal move
-    socket.emit("sendMove", moveDetails);
-    return true;
+    const result = attemptMove(sourceSquare, targetSquare);
+    if (result === "promotion") return false;
+    return result;
   }
 
   function getMoveOptions(square: Square) {
@@ -343,18 +385,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
       return;
     }
 
-    const moveDetails = {
-      from: moveFrom,
-      to: square,
-      promotion: "q"
-    };
-
-    const move = makeMove(moveDetails);
-    if (!move) {
+    const result = attemptMove(moveFrom as Square, square);
+    if (result === false) {
       resetFirstMove(square);
-    } else {
-      setMoveFrom(null);
-      socket.emit("sendMove", moveDetails);
     }
   }
 
@@ -541,6 +574,22 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     };
   }
 
+  function offerDraw() {
+    if (lobby.side === "s" || lobby.endReason || lobby.winner || !lobby.pgn) return;
+    socket.emit("offerDraw");
+  }
+
+  function respondToDraw(accept: boolean) {
+    if (lobby.side === "s" || lobby.endReason || lobby.winner || lobby.drawOfferFrom === undefined) return;
+    socket.emit("respondToDraw", accept);
+  }
+
+  function resignMatch() {
+    if (lobby.side === "s" || lobby.endReason || lobby.winner || !lobby.pgn) return;
+    if (!window.confirm("Resign this match? Your opponent will receive the win.")) return;
+    socket.emit("resignGame");
+  }
+
   function claimAbandoned(type: "win" | "draw") {
     if (
       lobby.side === "s" ||
@@ -556,7 +605,11 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   }
 
   return (
-    <div className="flex w-full flex-wrap justify-center gap-6 px-4 py-4 lg:gap-10 2xl:gap-16">
+    <>
+      {pendingPromotion && (
+        <PromotionPicker color={lobby.actualGame.turn()} onChoose={choosePromotion} onCancel={cancelPromotion} />
+      )}
+      <div className="flex w-full flex-wrap justify-center gap-6 px-4 py-4 lg:gap-10 2xl:gap-16">
       <div className="relative h-min">
         {/* overlay */}
         {(!lobby.white?.id || !lobby.black?.id) && (
@@ -575,31 +628,134 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           </div>
         )}
 
-        <Chessboard
-          boardWidth={boardWidth}
-          customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
-          customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
-          customPieces={customPieces}
-          position={navFen || lobby.actualGame.fen()}
-          boardOrientation={lobby.side === "b" ? "black" : "white"}
-          isDraggablePiece={isDraggablePiece}
-          onPieceDragBegin={onPieceDragBegin}
-          onPieceDragEnd={onPieceDragEnd}
-          onPieceDrop={onDrop}
-          onSquareClick={onSquareClick}
-          onSquareRightClick={onSquareRightClick}
-          arePremovesAllowed={!navFen}
-          customSquareStyles={{
-            ...(navIndex === null ? customSquares.lastMove : getNavMoveSquares()),
-            ...(navIndex === null ? customSquares.check : {}),
-            ...customSquares.rightClicked,
-            ...(navIndex === null ? customSquares.options : {})
-          }}
-          ref={chessboardRef}
+        <div className="mb-2 flex items-center justify-between gap-2" style={{ width: boardWidth }}>
+          <div className="flex items-center gap-2 text-xs opacity-75">
+            <span
+              className={`badge badge-sm ${
+                connectionState === "connected"
+                  ? "badge-success"
+                  : connectionState === "connecting"
+                    ? "badge-warning"
+                    : "badge-error"
+              }`}
+            >
+              {connectionState === "connected"
+                ? "online"
+                : connectionState === "connecting"
+                  ? "connecting"
+                  : "reconnecting"}
+            </span>
+            <span>
+              {boardMode === "3d" ? "Interactive grow-room board" : "2D compatibility board"}
+            </span>
+          </div>
+          <div className="join">
+            <button
+              type="button"
+              className={`btn join-item btn-xs ${boardMode === "3d" ? "btn-primary" : "btn-ghost"}`}
+              aria-pressed={boardMode === "3d"}
+              onClick={() => setBoardMode("3d")}
+            >
+              3D
+            </button>
+            <button
+              type="button"
+              className={`btn join-item btn-xs ${boardMode === "2d" ? "btn-primary" : "btn-ghost"}`}
+              aria-pressed={boardMode === "2d"}
+              onClick={() => setBoardMode("2d")}
+            >
+              2D
+            </button>
+          </div>
+        </div>
+
+        <div style={{ width: boardWidth, height: boardWidth }}>
+          {boardMode === "3d" ? (
+            <ThreeChessBoard
+              fen={navFen || lobby.actualGame.fen()}
+              orientation={lobby.side === "b" ? "black" : "white"}
+              disabled={
+                lobby.side === "s" ||
+                !!navFen ||
+                !!lobby.endReason ||
+                !!lobby.winner ||
+                lobby.side !== lobby.actualGame.turn()
+              }
+              selectedSquare={moveFrom ? String(moveFrom) : null}
+              legalSquares={Object.keys(customSquares.options).filter((square) => square !== moveFrom)}
+              lastMoveSquares={Object.keys(
+                navIndex === null ? customSquares.lastMove : getNavMoveSquares() || {}
+              )}
+              checkSquares={Object.keys(navIndex === null ? customSquares.check : {})}
+              markerSquares={Object.keys(customSquares.rightClicked)}
+              onSquareClick={onSquareClick}
+              onSquareRightClick={onSquareRightClick}
+            />
+          ) : (
+            <Chessboard
+              boardWidth={boardWidth}
+              customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
+              customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
+              customPieces={customPieces}
+              position={navFen || lobby.actualGame.fen()}
+              boardOrientation={lobby.side === "b" ? "black" : "white"}
+              isDraggablePiece={isDraggablePiece}
+              onPieceDragBegin={onPieceDragBegin}
+              onPieceDragEnd={onPieceDragEnd}
+              onPieceDrop={onDrop}
+              onSquareClick={onSquareClick}
+              onSquareRightClick={onSquareRightClick}
+              arePremovesAllowed={!navFen}
+              customSquareStyles={{
+                ...(navIndex === null ? customSquares.lastMove : getNavMoveSquares()),
+                ...(navIndex === null ? customSquares.check : {}),
+                ...customSquares.rightClicked,
+                ...(navIndex === null ? customSquares.options : {})
+              }}
+              ref={chessboardRef}
+            />
+          )}
+        </div>
+        <CapturedPieces
+          history={
+            navIndex === null
+              ? (lobby.actualGame.history({ verbose: true }) as Move[])
+              : (lobby.actualGame.history({ verbose: true }) as Move[]).slice(0, navIndex + 1)
+          }
         />
       </div>
 
       <div className="flex max-w-lg flex-1 flex-col items-center justify-center gap-4">
+        <div className="flex w-full flex-wrap items-center gap-2 px-2 text-xs">
+          <span className="badge badge-outline">Room {initialLobby.code}</span>
+          <span className="badge badge-outline">
+            {lobby.side === "w" ? "Light player" : lobby.side === "b" ? "Dark player" : "Spectator"}
+          </span>
+          <span className="badge badge-outline">{lobby.observers?.length ?? 0} watching</span>
+          {lobby.side !== "s" && lobby.pgn && !lobby.endReason && !lobby.winner && (
+            <>
+              {lobby.drawOfferFrom === undefined ? (
+                <button type="button" className="btn btn-outline btn-xs" onClick={offerDraw}>
+                  Offer Draw
+                </button>
+              ) : lobby.drawOfferFrom === session?.user?.id ? (
+                <span className="badge badge-warning badge-sm">Draw offered</span>
+              ) : (
+                <div className="join">
+                  <button type="button" className="btn btn-success btn-outline join-item btn-xs" onClick={() => respondToDraw(true)}>
+                    Accept Draw
+                  </button>
+                  <button type="button" className="btn btn-ghost join-item btn-xs" onClick={() => respondToDraw(false)}>
+                    Decline
+                  </button>
+                </div>
+              )}
+              <button type="button" className="btn btn-error btn-outline btn-xs" onClick={resignMatch}>
+                Resign
+              </button>
+            </>
+          )}
+        </div>
         <div className="mb-auto flex w-full p-2">
           <div className="flex flex-1 flex-col items-center justify-between">
             {getPlayerHtml("top")}
@@ -687,8 +843,10 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
             <div className="bg-neutral absolute w-full rounded-t-lg bg-opacity-95 p-2">
               {lobby.endReason ? (
                 <div>
-                  {lobby.endReason === "abandoned"
-                    ? lobby.winner === "draw"
+                  {lobby.endReason === "resigned"
+                    ? `The match was won by ${lobby.winner} after resignation.`
+                    : lobby.endReason === "abandoned"
+                      ? lobby.winner === "draw"
                       ? `The match ended in an even harvest due to abandonment.`
                       : `The match was won by ${lobby.winner} due to abandonment.`
                     : lobby.winner === "draw"
@@ -705,6 +863,11 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                     {getDisplayGameUrl()}
                   </a>
                   .
+                  <div className="mt-2">
+                    <a href="/" className="btn btn-primary btn-sm mt-2">
+                      Play Again / New Match
+                    </a>
+                  </div>
                 </div>
               ) : abandonSeconds > 0 ? (
                 `The other grower disconnected. You can claim the harvest or even harvest in ${abandonSeconds} second${
@@ -791,6 +954,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -4,7 +4,7 @@ export interface Game {
     white?: User;
     black?: User;
     winner?: "white" | "black" | "draw";
-    endReason?: "draw" | "checkmate" | "stalemate" | "repetition" | "insufficient" | "abandoned";
+    endReason?: "draw" | "checkmate" | "stalemate" | "repetition" | "insufficient" | "abandoned" | "resigned";
     host?: User;
     code?: string;
     unlisted?: boolean;
@@ -12,6 +12,7 @@ export interface Game {
     observers?: User[];
     startedAt?: number;
     endedAt?: number;
+    drawOfferFrom?: User["id"];
 }
 
 export interface User {
