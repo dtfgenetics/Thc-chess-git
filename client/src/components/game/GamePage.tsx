@@ -29,6 +29,7 @@ import { io } from "socket.io-client";
 import { lobbyReducer, squareReducer } from "./reducers";
 import { initSocket } from "./socketEvents";
 import { syncPgn, syncSide } from "./utils";
+import CapturedPieces from "./CapturedPieces";
 import PromotionPicker from "./PromotionPicker";
 import ThreeChessBoard from "./ThreeChessBoard";
 
@@ -681,6 +682,13 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
             />
           )}
         </div>
+        <CapturedPieces
+          history={
+            navIndex === null
+              ? (lobby.actualGame.history({ verbose: true }) as Move[])
+              : (lobby.actualGame.history({ verbose: true }) as Move[]).slice(0, navIndex + 1)
+          }
+        />
       </div>
 
       <div className="flex max-w-lg flex-1 flex-col items-center justify-center gap-4">

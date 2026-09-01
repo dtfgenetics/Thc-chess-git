@@ -542,6 +542,14 @@ export default function ThreeChessBoard({
       aria-label="Interactive 3D Kush Kings chess board. Drag to rotate the camera, scroll or pinch to zoom, and click a piece then a highlighted square to move."
     >
       <Canvas
+        fallback={
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-base-200 p-6 text-center">
+            <strong>3D is unavailable on this device.</strong>
+            <span className="max-w-xs text-sm opacity-75">
+              Use the 2D button above to keep playing the same multiplayer match.
+            </span>
+          </div>
+        }
         key={`${orientation}-${cameraView}-${cameraReset}`}
         shadows
         dpr={[1, 1.35]}
