@@ -191,7 +191,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     } else if (window.innerWidth >= 768) {
       setBoardWidth(480);
     } else {
-      setBoardWidth(350);
+      setBoardWidth(Math.min(350, Math.max(240, window.innerWidth - 24)));
     }
   }
 

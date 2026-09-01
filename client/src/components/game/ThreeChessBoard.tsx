@@ -2,9 +2,10 @@
 /* eslint-disable no-unused-vars */
 
 import { OrbitControls } from "@react-three/drei";
-import { Canvas, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
 import { Chess, type Color, type PieceSymbol, type Square } from "chess.js";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import type { Group } from "three";
 
 import { KUSH_BOARD_THEME } from "@/kushTheme";
 
@@ -319,17 +320,38 @@ function BoardSquare({
 
 function PieceActor({
   piece,
+  animateFrom,
   disabled,
   onSquareClick,
   onSquareRightClick
 }: {
   piece: PieceDescriptor;
+  animateFrom?: Square;
   disabled: boolean;
   onSquareClick: (square: Square) => void;
   onSquareRightClick?: (square: Square) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const [x, y, z] = worldFromSquare(piece.square);
+  const groupRef = useRef<Group>(null);
+  const target = worldFromSquare(piece.square);
+  const source = animateFrom ? worldFromSquare(animateFrom) : target;
+  const progress = useRef(animateFrom ? 0 : 1);
+
+  useFrame((_, delta) => {
+    const group = groupRef.current;
+    if (!group) return;
+
+    progress.current = Math.min(1, progress.current + delta * 4.2);
+    const eased = 1 - Math.pow(1 - progress.current, 3);
+    const hoverLift = hovered && !disabled ? 0.07 : 0;
+    const travelLift = animateFrom ? Math.sin(Math.PI * eased) * 0.3 : 0;
+
+    group.position.set(
+      source[0] + (target[0] - source[0]) * eased,
+      target[1] + travelLift + hoverLift,
+      source[2] + (target[2] - source[2]) * eased
+    );
+  });
 
   function click(event: ThreeEvent<MouseEvent>) {
     event.stopPropagation();
@@ -344,7 +366,8 @@ function PieceActor({
 
   return (
     <group
-      position={[x, y + (hovered && !disabled ? 0.07 : 0), z]}
+      ref={groupRef}
+      position={source}
       onClick={click}
       onContextMenu={contextMenu}
       onPointerEnter={() => setHovered(true)}
@@ -451,15 +474,23 @@ function BoardScene({
           })
         )}
 
-        {pieces.map((piece) => (
-          <PieceActor
-            key={`${piece.square}-${piece.color}-${piece.type}`}
-            piece={piece}
-            disabled={disabled ?? false}
-            onSquareClick={onSquareClick}
-            onSquareRightClick={onSquareRightClick}
-          />
-        ))}
+        {pieces.map((piece) => {
+          const moveSquares = lastMoveSquares ?? [];
+          const animateFrom =
+            moveSquares.length >= 2 && moveSquares[1] === piece.square
+              ? (moveSquares[0] as Square)
+              : undefined;
+          return (
+            <PieceActor
+              key={`${piece.square}-${piece.color}-${piece.type}`}
+              piece={piece}
+              animateFrom={animateFrom}
+              disabled={disabled ?? false}
+              onSquareClick={onSquareClick}
+              onSquareRightClick={onSquareRightClick}
+            />
+          );
+        })}
       </group>
 
       <mesh receiveShadow position={[0, -0.48, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -506,7 +537,7 @@ export default function ThreeChessBoard({
 
   return (
     <div
-      className="relative h-full w-full overflow-hidden rounded-xl border border-base-300 bg-[#08130D] shadow-2xl"
+      className="relative h-full w-full touch-none overflow-hidden rounded-xl border border-base-300 bg-[#08130D] shadow-2xl"
       role="application"
       aria-label="Interactive 3D Kush Kings chess board. Drag to rotate the camera, scroll or pinch to zoom, and click a piece then a highlighted square to move."
     >
