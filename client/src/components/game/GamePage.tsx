@@ -29,6 +29,7 @@ import { io } from "socket.io-client";
 import { lobbyReducer, squareReducer } from "./reducers";
 import { initSocket } from "./socketEvents";
 import { syncPgn, syncSide } from "./utils";
+import ThreeChessBoard from "./ThreeChessBoard";
 
 const socket = io(API_URL, { withCredentials: true, autoConnect: false });
 
@@ -50,6 +51,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
   const [moveFrom, setMoveFrom] = useState<string | Square | null>(null);
   const [boardWidth, setBoardWidth] = useState(480);
+  const [boardMode, setBoardMode] = useState<"3d" | "2d">("3d");
   const chessboardRef = useRef<ClearPremoves>(null);
 
   const [navFen, setNavFen] = useState<string | null>(null);
@@ -575,28 +577,80 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           </div>
         )}
 
-        <Chessboard
-          boardWidth={boardWidth}
-          customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
-          customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
-          customPieces={customPieces}
-          position={navFen || lobby.actualGame.fen()}
-          boardOrientation={lobby.side === "b" ? "black" : "white"}
-          isDraggablePiece={isDraggablePiece}
-          onPieceDragBegin={onPieceDragBegin}
-          onPieceDragEnd={onPieceDragEnd}
-          onPieceDrop={onDrop}
-          onSquareClick={onSquareClick}
-          onSquareRightClick={onSquareRightClick}
-          arePremovesAllowed={!navFen}
-          customSquareStyles={{
-            ...(navIndex === null ? customSquares.lastMove : getNavMoveSquares()),
-            ...(navIndex === null ? customSquares.check : {}),
-            ...customSquares.rightClicked,
-            ...(navIndex === null ? customSquares.options : {})
-          }}
-          ref={chessboardRef}
-        />
+        <div className="mb-2 flex items-center justify-between gap-2" style={{ width: boardWidth }}>
+          <div className="flex items-center gap-2 text-xs opacity-75">
+            <span className="badge badge-success badge-sm">3D ready</span>
+            <span>
+              {boardMode === "3d" ? "Interactive grow-room board" : "2D compatibility board"}
+            </span>
+          </div>
+          <div className="join">
+            <button
+              type="button"
+              className={`btn join-item btn-xs ${boardMode === "3d" ? "btn-primary" : "btn-ghost"}`}
+              aria-pressed={boardMode === "3d"}
+              onClick={() => setBoardMode("3d")}
+            >
+              3D
+            </button>
+            <button
+              type="button"
+              className={`btn join-item btn-xs ${boardMode === "2d" ? "btn-primary" : "btn-ghost"}`}
+              aria-pressed={boardMode === "2d"}
+              onClick={() => setBoardMode("2d")}
+            >
+              2D
+            </button>
+          </div>
+        </div>
+
+        <div style={{ width: boardWidth, height: boardWidth }}>
+          {boardMode === "3d" ? (
+            <ThreeChessBoard
+              fen={navFen || lobby.actualGame.fen()}
+              orientation={lobby.side === "b" ? "black" : "white"}
+              disabled={
+                lobby.side === "s" ||
+                !!navFen ||
+                !!lobby.endReason ||
+                !!lobby.winner ||
+                lobby.side !== lobby.actualGame.turn()
+              }
+              selectedSquare={moveFrom ? String(moveFrom) : null}
+              legalSquares={Object.keys(customSquares.options).filter((square) => square !== moveFrom)}
+              lastMoveSquares={Object.keys(
+                navIndex === null ? customSquares.lastMove : getNavMoveSquares() || {}
+              )}
+              checkSquares={Object.keys(navIndex === null ? customSquares.check : {})}
+              markerSquares={Object.keys(customSquares.rightClicked)}
+              onSquareClick={onSquareClick}
+              onSquareRightClick={onSquareRightClick}
+            />
+          ) : (
+            <Chessboard
+              boardWidth={boardWidth}
+              customDarkSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.darkSquare }}
+              customLightSquareStyle={{ backgroundColor: KUSH_BOARD_THEME.lightSquare }}
+              customPieces={customPieces}
+              position={navFen || lobby.actualGame.fen()}
+              boardOrientation={lobby.side === "b" ? "black" : "white"}
+              isDraggablePiece={isDraggablePiece}
+              onPieceDragBegin={onPieceDragBegin}
+              onPieceDragEnd={onPieceDragEnd}
+              onPieceDrop={onDrop}
+              onSquareClick={onSquareClick}
+              onSquareRightClick={onSquareRightClick}
+              arePremovesAllowed={!navFen}
+              customSquareStyles={{
+                ...(navIndex === null ? customSquares.lastMove : getNavMoveSquares()),
+                ...(navIndex === null ? customSquares.check : {}),
+                ...customSquares.rightClicked,
+                ...(navIndex === null ? customSquares.options : {})
+              }}
+              ref={chessboardRef}
+            />
+          )}
+        </div>
       </div>
 
       <div className="flex max-w-lg flex-1 flex-col items-center justify-center gap-4">

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable no-unused-vars */
 
 import { OrbitControls } from "@react-three/drei";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
@@ -434,7 +435,7 @@ function BoardScene({
 
         {Array.from({ length: BOARD_SIZE }, (_, row) =>
           Array.from({ length: BOARD_SIZE }, (_, column) => {
-            const square = squareFromGrid(7 - row, column);
+            const square = squareFromGrid(row, column);
             return (
               <BoardSquare
                 key={square}
