@@ -35,6 +35,9 @@ jobs:
       - name: Apply 3D camera controls
         run: python scripts/apply-3d-camera-controls.py
 
+      - name: Apply 3D animation and mobile sizing
+        run: python scripts/apply-3d-animation-mobile.py
+
       - name: Check rebrand
         run: pnpm check:rebrand
 
@@ -53,5 +56,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx
-          git commit -m "Add promotion choice and 3D camera controls [skip interaction verify]"
+          git commit -m "Animate 3D moves and improve mobile board controls [skip interaction verify]"
           git push
