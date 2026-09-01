@@ -29,27 +29,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Apply promotion picker wiring
-        run: python scripts/apply-promotion-picker.py
-
-      - name: Apply 3D camera controls
-        run: python scripts/apply-3d-camera-controls.py
-
-      - name: Apply 3D animation and mobile sizing
-        run: python scripts/apply-3d-animation-mobile.py
-
-      - name: Apply captured trays and WebGL fallback
-        run: python scripts/apply-captured-fallback.py
-
-      - name: Apply lobby connection resilience
-        run: python scripts/apply-lobby-resilience.py
-
-      - name: Apply 3D archive replay
-        run: python scripts/apply-3d-archive.py
-
-      - name: Apply resignation flow
-        run: python scripts/apply-resign-flow.py
-
       - name: Apply draw offer flow
         run: python scripts/apply-draw-offers.py
 
@@ -71,14 +50,17 @@ jobs:
       - name: Verify resignation ownership
         run: node server/scripts/verify-resignation.mjs
 
-      - name: Commit verified interaction pass
+      - name: Verify draw offer ownership
+        run: node server/scripts/verify-draw-offers.mjs
+
+      - name: Commit verified draw offer flow
         run: |
-          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts; then
-            echo "Interaction pass is already committed"
+          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/socketEvents.ts server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts; then
+            echo "Draw offer flow is already committed"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts
+          git add client/src/components/game/GamePage.tsx client/src/components/game/socketEvents.ts server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts
           git commit -m "Add server-authoritative draw offers [skip interaction verify]"
           git push
