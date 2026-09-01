@@ -494,6 +494,16 @@ export default function ThreeChessBoard({
   onSquareClick,
   onSquareRightClick
 }: ThreeChessBoardProps) {
+  const [cameraView, setCameraView] = useState<"player" | "top">("player");
+  const [cameraReset, setCameraReset] = useState(0);
+  const cameraPosition: [number, number, number] =
+    cameraView === "top" ? [0, 12.5, 0.001] : [0, 8.4, 9.6];
+
+  function selectCamera(view: "player" | "top") {
+    setCameraView(view);
+    setCameraReset((value) => value + 1);
+  }
+
   return (
     <div
       className="relative h-full w-full overflow-hidden rounded-xl border border-base-300 bg-[#08130D] shadow-2xl"
@@ -501,9 +511,10 @@ export default function ThreeChessBoard({
       aria-label="Interactive 3D Kush Kings chess board. Drag to rotate the camera, scroll or pinch to zoom, and click a piece then a highlighted square to move."
     >
       <Canvas
+        key={`${orientation}-${cameraView}-${cameraReset}`}
         shadows
-        dpr={[1, 1.5]}
-        camera={{ position: [0, 8.4, 9.6], fov: 42, near: 0.1, far: 50 }}
+        dpr={[1, 1.35]}
+        camera={{ position: cameraPosition, fov: cameraView === "top" ? 38 : 42, near: 0.1, far: 50 }}
         gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
       >
         <BoardScene
@@ -519,7 +530,35 @@ export default function ThreeChessBoard({
           onSquareRightClick={onSquareRightClick}
         />
       </Canvas>
-      <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/55 px-2 py-1 text-[10px] text-white/80">
+      <div className="absolute right-2 top-2 z-10 flex gap-1 rounded-lg bg-black/55 p-1 backdrop-blur-sm">
+        <button
+          type="button"
+          className={`btn btn-xs ${cameraView === "player" ? "btn-primary" : "btn-ghost text-white"}`}
+          aria-label="Use player camera"
+          aria-pressed={cameraView === "player"}
+          onClick={() => selectCamera("player")}
+        >
+          Player
+        </button>
+        <button
+          type="button"
+          className={`btn btn-xs ${cameraView === "top" ? "btn-primary" : "btn-ghost text-white"}`}
+          aria-label="Use overhead camera"
+          aria-pressed={cameraView === "top"}
+          onClick={() => selectCamera("top")}
+        >
+          Top
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs text-white"
+          aria-label="Reset camera"
+          onClick={() => setCameraReset((value) => value + 1)}
+        >
+          Reset
+        </button>
+      </div>
+      <div className="pointer-events-none absolute bottom-2 left-2 max-w-[75%] rounded bg-black/55 px-2 py-1 text-[10px] text-white/80">
         Drag to rotate · pinch/scroll to zoom · click to move
       </div>
     </div>

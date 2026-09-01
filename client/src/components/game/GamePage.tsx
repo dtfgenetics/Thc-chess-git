@@ -29,9 +29,12 @@ import { io } from "socket.io-client";
 import { lobbyReducer, squareReducer } from "./reducers";
 import { initSocket } from "./socketEvents";
 import { syncPgn, syncSide } from "./utils";
+import PromotionPicker from "./PromotionPicker";
 import ThreeChessBoard from "./ThreeChessBoard";
 
 const socket = io(API_URL, { withCredentials: true, autoConnect: false });
+
+type PromotionPiece = "q" | "r" | "b" | "n";
 
 export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   const session = useContext(SessionContext);
@@ -52,6 +55,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   const [moveFrom, setMoveFrom] = useState<string | Square | null>(null);
   const [boardWidth, setBoardWidth] = useState(480);
   const [boardMode, setBoardMode] = useState<"3d" | "2d">("3d");
+  const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
   const chessboardRef = useRef<ClearPremoves>(null);
 
   const [navFen, setNavFen] = useState<string | null>(null);
@@ -273,22 +277,53 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     return piece.startsWith(lobby.side) && !lobby.endReason && !lobby.winner;
   }
 
+  function needsPromotion(from: Square, to: Square) {
+    const piece = lobby.actualGame.get(from);
+    if (!piece || piece.type !== "p") return false;
+    const moves = lobby.actualGame.moves({ square: from, verbose: true }) as Move[];
+    return moves.some((move) => move.to === to && Boolean(move.promotion));
+  }
+
+  function sendMove(from: Square, to: Square, promotion?: PromotionPiece) {
+    const moveDetails = { from, to, ...(promotion ? { promotion } : {}) };
+    const move = makeMove(moveDetails);
+    if (!move) return false;
+    setMoveFrom(null);
+    socket.emit("sendMove", moveDetails);
+    return true;
+  }
+
+  function attemptMove(from: Square, to: Square) {
+    if (needsPromotion(from, to)) {
+      setPendingPromotion({ from, to });
+      updateCustomSquares({ options: {} });
+      return "promotion" as const;
+    }
+    return sendMove(from, to);
+  }
+
+  function choosePromotion(piece: PromotionPiece) {
+    if (!pendingPromotion) return;
+    const { from, to } = pendingPromotion;
+    setPendingPromotion(null);
+    sendMove(from, to, piece);
+  }
+
+  function cancelPromotion() {
+    setPendingPromotion(null);
+    setMoveFrom(null);
+    updateCustomSquares({ options: {} });
+  }
+
   function onDrop(sourceSquare: Square, targetSquare: Square) {
     if (lobby.side === "s" || navFen || lobby.endReason || lobby.winner) return false;
 
     // premove
     if (lobby.side !== lobby.actualGame.turn()) return true;
 
-    const moveDetails = {
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: "q"
-    };
-
-    const move = makeMove(moveDetails);
-    if (!move) return false; // illegal move
-    socket.emit("sendMove", moveDetails);
-    return true;
+    const result = attemptMove(sourceSquare, targetSquare);
+    if (result === "promotion") return false;
+    return result;
   }
 
   function getMoveOptions(square: Square) {
@@ -345,18 +380,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
       return;
     }
 
-    const moveDetails = {
-      from: moveFrom,
-      to: square,
-      promotion: "q"
-    };
-
-    const move = makeMove(moveDetails);
-    if (!move) {
+    const result = attemptMove(moveFrom as Square, square);
+    if (result === false) {
       resetFirstMove(square);
-    } else {
-      setMoveFrom(null);
-      socket.emit("sendMove", moveDetails);
     }
   }
 
@@ -558,7 +584,11 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   }
 
   return (
-    <div className="flex w-full flex-wrap justify-center gap-6 px-4 py-4 lg:gap-10 2xl:gap-16">
+    <>
+      {pendingPromotion && (
+        <PromotionPicker color={lobby.actualGame.turn()} onChoose={choosePromotion} onCancel={cancelPromotion} />
+      )}
+      <div className="flex w-full flex-wrap justify-center gap-6 px-4 py-4 lg:gap-10 2xl:gap-16">
       <div className="relative h-min">
         {/* overlay */}
         {(!lobby.white?.id || !lobby.black?.id) && (
@@ -845,6 +875,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
