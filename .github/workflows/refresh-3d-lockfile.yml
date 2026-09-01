@@ -32,20 +32,23 @@ jobs:
       - name: Integrate live 3D board
         run: python scripts/apply-3d-gamepage.py
 
+      - name: Fix 3D board picking
+        run: python scripts/fix-3d-board.py
+
       - name: Lint client
         run: pnpm --filter client lint
 
       - name: Build client
         run: pnpm build:client
 
-      - name: Commit integrated board when changed
+      - name: Commit verified integration when changed
         run: |
-          if git diff --quiet client/src/components/game/GamePage.tsx; then
-            echo "GamePage integration is already committed"
+          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx; then
+            echo "3D integration is already committed"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add client/src/components/game/GamePage.tsx
-          git commit -m "Wire 3D Kush Kings board into live rooms [skip 3d verify]"
+          git add client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx
+          git commit -m "Wire verified 3D Kush Kings board into live rooms [skip 3d verify]"
           git push
