@@ -44,6 +44,9 @@ jobs:
       - name: Apply lobby connection resilience
         run: python scripts/apply-lobby-resilience.py
 
+      - name: Apply 3D archive replay
+        run: python scripts/apply-3d-archive.py
+
       - name: Check rebrand
         run: pnpm check:rebrand
 
@@ -58,12 +61,12 @@ jobs:
 
       - name: Commit verified interaction pass
         run: |
-          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts; then
+          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx; then
             echo "Interaction pass is already committed"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts
-          git commit -m "Improve multiplayer lobby connection resilience [skip interaction verify]"
+          git add client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx
+          git commit -m "Add 3D archived match replay [skip interaction verify]"
           git push
