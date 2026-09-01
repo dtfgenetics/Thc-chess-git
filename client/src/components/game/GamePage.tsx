@@ -863,6 +863,11 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                     {getDisplayGameUrl()}
                   </a>
                   .
+                  <div className="mt-2">
+                    <a href="/" className="btn btn-primary btn-sm mt-2">
+                      Play Again / New Match
+                    </a>
+                  </div>
                 </div>
               ) : abandonSeconds > 0 ? (
                 `The other grower disconnected. You can claim the harvest or even harvest in ${abandonSeconds} second${

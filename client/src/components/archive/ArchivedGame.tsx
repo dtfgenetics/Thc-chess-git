@@ -423,6 +423,11 @@ export default function ArchivedGame({ game }: { game: Game }) {
                 </button>
               </div>
             </div>
+            <div className="mb-2 flex justify-end">
+              <a href="/" className="btn btn-primary btn-sm">
+                Play Again / New Match
+              </a>
+            </div>
             <textarea
               className="textarea-bordered textarea h-full w-full resize-none rounded-tr-none font-mono text-xs leading-6"
               value={showPgn ? (game.pgn as string) : actualGame.fen()}
