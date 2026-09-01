@@ -71,6 +71,42 @@ jobs:
       - name: Verify draw offer ownership
         run: node server/scripts/verify-draw-offers.mjs
 
+  deployment-config-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate production Compose merge
+        env:
+          NEXT_PUBLIC_APP_NAME: Kush Kings Chess
+          NEXT_PUBLIC_SITE_URL: https://chess.dtfseeds.com
+          NEXT_PUBLIC_API_URL: https://chess-api.dtfseeds.com
+          PGDATABASE: kush_kings_chess
+          PGUSER: kush_kings
+          PGPASSWORD: ci-placeholder-only
+        run: |
+          docker compose \
+            -f docker-compose.production.yml \
+            -f deploy/caddy/docker-compose.caddy.yml \
+            config >/dev/null
+
+      - name: Validate Caddy production config
+        run: |
+          docker run --rm \
+            -v "$PWD/deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2-alpine \
+            caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+
+      - name: Verify deployment contract markers
+        run: |
+          grep -q 'workflow_dispatch' .github/workflows/deploy-production.yml
+          grep -q 'KUSH_VPS_SSH_KEY' .github/workflows/deploy-production.yml
+          grep -q 'https://chess-api.dtfseeds.com/health' .github/workflows/deploy-production.yml
+          grep -q 'reverse_proxy client:3000' deploy/caddy/Caddyfile
+          grep -q 'reverse_proxy server:3001' deploy/caddy/Caddyfile
+
   hostinger-shared-hosting-checks:
     runs-on: ubuntu-latest
 
