@@ -11,3 +11,22 @@ export function resolveResignationWinner(
     if (game.black.id === userId) return "white";
     return null;
 }
+
+export function canOfferDraw(
+    game: Pick<Game, "white" | "black" | "drawOfferFrom">,
+    userId: User["id"]
+): boolean {
+    if (!game.white || !game.black || userId === undefined || game.drawOfferFrom !== undefined) return false;
+    return game.white.id === userId || game.black.id === userId;
+}
+
+export function canRespondToDraw(
+    game: Pick<Game, "white" | "black" | "drawOfferFrom">,
+    userId: User["id"]
+): boolean {
+    if (!game.white || !game.black || userId === undefined || game.drawOfferFrom === undefined) return false;
+    if (game.drawOfferFrom === userId) return false;
+    const userIsPlayer = game.white.id === userId || game.black.id === userId;
+    const offererIsPlayer = game.white.id === game.drawOfferFrom || game.black.id === game.drawOfferFrom;
+    return userIsPlayer && offererIsPlayer;
+}
