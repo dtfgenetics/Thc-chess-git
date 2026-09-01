@@ -47,11 +47,14 @@ jobs:
       - name: Apply 3D archive replay
         run: python scripts/apply-3d-archive.py
 
+      - name: Apply resignation flow
+        run: python scripts/apply-resign-flow.py
+
       - name: Check rebrand
         run: pnpm check:rebrand
 
-      - name: Lint client
-        run: pnpm --filter client lint
+      - name: Lint all workspaces
+        run: pnpm lint
 
       - name: Build client
         run: pnpm build:client
@@ -61,12 +64,12 @@ jobs:
 
       - name: Commit verified interaction pass
         run: |
-          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx; then
+          if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts; then
             echo "Interaction pass is already committed"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx
-          git commit -m "Add 3D archived match replay [skip interaction verify]"
+          git add client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts
+          git commit -m "Add server-authoritative match resignation [skip interaction verify]"
           git push
