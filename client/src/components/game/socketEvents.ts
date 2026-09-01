@@ -5,6 +5,8 @@ import type { Socket } from "socket.io-client";
 
 import { syncPgn, syncSide } from "./utils";
 
+export type SocketConnectionState = "connecting" | "connected" | "disconnected";
+
 function displaySide(side?: "white" | "black" | "draw") {
     if (side === "white") return "light side";
     if (side === "black") return "dark side";
@@ -22,18 +24,31 @@ export function initSocket(
         makeMove: Function;
         setNavFen: Dispatch<SetStateAction<string | null>>;
         setNavIndex: Dispatch<SetStateAction<number | null>>;
+        setConnectionState: Dispatch<SetStateAction<SocketConnectionState>>;
+        setPlayBtnLoading: Dispatch<SetStateAction<boolean>>;
     }
 ) {
     socket.on("connect", () => {
+        actions.setConnectionState("connected");
         socket.emit("joinLobby", lobby.code);
     });
-    // TODO: handle disconnect
+
+    socket.on("disconnect", () => {
+        actions.setConnectionState("disconnected");
+        actions.setPlayBtnLoading(false);
+    });
+
+    socket.on("connect_error", () => {
+        actions.setConnectionState("disconnected");
+        actions.setPlayBtnLoading(false);
+    });
 
     socket.on("chat", (message: Message) => {
         actions.addMessage(message);
     });
 
     socket.on("receivedLatestGame", (latestGame: Game) => {
+        actions.setPlayBtnLoading(false);
         if (latestGame.pgn && latestGame.pgn !== lobby.actualGame.pgn()) {
             syncPgn(latestGame.pgn, lobby, actions);
         }

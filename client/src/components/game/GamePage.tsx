@@ -27,7 +27,7 @@ import { KUSH_BOARD_THEME, KUSH_COPY, KUSH_PIECE_ASSETS } from "@/kushTheme";
 import { io } from "socket.io-client";
 
 import { lobbyReducer, squareReducer } from "./reducers";
-import { initSocket } from "./socketEvents";
+import { initSocket, type SocketConnectionState } from "./socketEvents";
 import { syncPgn, syncSide } from "./utils";
 import CapturedPieces from "./CapturedPieces";
 import PromotionPicker from "./PromotionPicker";
@@ -57,6 +57,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   const [boardWidth, setBoardWidth] = useState(480);
   const [boardMode, setBoardMode] = useState<"3d" | "2d">("3d");
   const [pendingPromotion, setPendingPromotion] = useState<{ from: Square; to: Square } | null>(null);
+  const [connectionState, setConnectionState] = useState<SocketConnectionState>("connecting");
   const chessboardRef = useRef<ClearPremoves>(null);
 
   const [navFen, setNavFen] = useState<string | null>(null);
@@ -126,6 +127,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
   useEffect(() => {
     if (!session?.user || !session.user?.id) return;
+    setConnectionState("connecting");
     socket.connect();
 
     window.addEventListener("resize", handleResize);
@@ -143,7 +145,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
       updateCustomSquares,
       makeMove,
       setNavFen,
-      setNavIndex
+      setNavIndex,
+      setConnectionState,
+      setPlayBtnLoading
     });
 
     return () => {
@@ -610,7 +614,21 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
         <div className="mb-2 flex items-center justify-between gap-2" style={{ width: boardWidth }}>
           <div className="flex items-center gap-2 text-xs opacity-75">
-            <span className="badge badge-success badge-sm">3D ready</span>
+            <span
+              className={`badge badge-sm ${
+                connectionState === "connected"
+                  ? "badge-success"
+                  : connectionState === "connecting"
+                    ? "badge-warning"
+                    : "badge-error"
+              }`}
+            >
+              {connectionState === "connected"
+                ? "online"
+                : connectionState === "connecting"
+                  ? "connecting"
+                  : "reconnecting"}
+            </span>
             <span>
               {boardMode === "3d" ? "Interactive grow-room board" : "2D compatibility board"}
             </span>
@@ -692,6 +710,13 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
       </div>
 
       <div className="flex max-w-lg flex-1 flex-col items-center justify-center gap-4">
+        <div className="flex w-full flex-wrap items-center gap-2 px-2 text-xs">
+          <span className="badge badge-outline">Room {initialLobby.code}</span>
+          <span className="badge badge-outline">
+            {lobby.side === "w" ? "Light player" : lobby.side === "b" ? "Dark player" : "Spectator"}
+          </span>
+          <span className="badge badge-outline">{lobby.observers?.length ?? 0} watching</span>
+        </div>
         <div className="mb-auto flex w-full p-2">
           <div className="flex flex-1 flex-col items-center justify-between">
             {getPlayerHtml("top")}
