@@ -159,6 +159,65 @@ export async function claimAbandoned(this: Socket, type: "win" | "draw") {
     activeGames.splice(activeGames.indexOf(game), 1);
 }
 
+export async function offerDraw(this: Socket) {
+    const game = activeGames.find((g) => g.code === Array.from(this.rooms)[1]);
+    if (!game || game.endReason || game.winner || !game.pgn || !game.white || !game.black) return;
+
+    const userId = this.request.session.user.id;
+    if (userId !== game.white.id && userId !== game.black.id) {
+        console.log(`offerDraw: session user is not seated in the active game.`);
+        return;
+    }
+    if (game.drawOfferFrom === userId) return;
+
+    game.drawOfferFrom = userId;
+    io.to(game.code as string).emit("drawOffered", {
+        from: userId,
+        name: this.request.session.user.name
+    });
+}
+
+export async function respondToDraw(this: Socket, accept: boolean) {
+    const game = activeGames.find((g) => g.code === Array.from(this.rooms)[1]);
+    if (!game || game.endReason || game.winner || !game.pgn || !game.white || !game.black) return;
+
+    const userId = this.request.session.user.id;
+    if (userId !== game.white.id && userId !== game.black.id) {
+        console.log(`respondToDraw: session user is not seated in the active game.`);
+        return;
+    }
+    if (game.drawOfferFrom === undefined || game.drawOfferFrom === userId) return;
+
+    if (!accept) {
+        game.drawOfferFrom = undefined;
+        io.to(game.code as string).emit("drawOfferCleared", {
+            message: `${this.request.session.user.name} declined the draw offer.`
+        });
+        return;
+    }
+
+    game.drawOfferFrom = undefined;
+    game.endReason = "draw";
+    game.winner = "draw";
+
+    const saved = (await GameModel.save(game)) as Game | null;
+    if (!saved?.id) {
+        console.log(`respondToDraw: failed to persist game ${game.code}.`);
+        this.emit("receivedLatestGame", game);
+        return;
+    }
+    game.id = saved.id;
+
+    io.to(game.code as string).emit("gameOver", {
+        reason: game.endReason,
+        winnerSide: "draw",
+        id: game.id
+    });
+
+    if (game.timeout) clearTimeout(game.timeout);
+    activeGames.splice(activeGames.indexOf(game), 1);
+}
+
 export async function resignGame(this: Socket) {
     const game = activeGames.find((g) => g.code === Array.from(this.rooms)[1]);
     if (!game || game.endReason || game.winner || !game.pgn || !game.white || !game.black) return;
@@ -220,6 +279,12 @@ export async function sendMove(this: Socket, m: { from: string; to: string; prom
 
         if (newMove) {
             game.pgn = chess.pgn();
+            if (game.drawOfferFrom !== undefined) {
+                game.drawOfferFrom = undefined;
+                io.to(game.code as string).emit("drawOfferCleared", {
+                    message: "The draw offer was declined by continuing play."
+                });
+            }
             this.to(game.code as string).emit("receivedMove", m);
             if (chess.isGameOver()) {
                 let reason: Game["endReason"];

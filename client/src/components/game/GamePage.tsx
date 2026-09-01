@@ -574,6 +574,16 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     };
   }
 
+  function offerDraw() {
+    if (lobby.side === "s" || lobby.endReason || lobby.winner || !lobby.pgn) return;
+    socket.emit("offerDraw");
+  }
+
+  function respondToDraw(accept: boolean) {
+    if (lobby.side === "s" || lobby.endReason || lobby.winner || lobby.drawOfferFrom === undefined) return;
+    socket.emit("respondToDraw", accept);
+  }
+
   function resignMatch() {
     if (lobby.side === "s" || lobby.endReason || lobby.winner || !lobby.pgn) return;
     if (!window.confirm("Resign this match? Your opponent will receive the win.")) return;
@@ -723,9 +733,27 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
           </span>
           <span className="badge badge-outline">{lobby.observers?.length ?? 0} watching</span>
           {lobby.side !== "s" && lobby.pgn && !lobby.endReason && !lobby.winner && (
-            <button type="button" className="btn btn-error btn-outline btn-xs" onClick={resignMatch}>
-              Resign
-            </button>
+            <>
+              {lobby.drawOfferFrom === undefined ? (
+                <button type="button" className="btn btn-outline btn-xs" onClick={offerDraw}>
+                  Offer Draw
+                </button>
+              ) : lobby.drawOfferFrom === session?.user?.id ? (
+                <span className="badge badge-warning badge-sm">Draw offered</span>
+              ) : (
+                <div className="join">
+                  <button type="button" className="btn btn-success btn-outline join-item btn-xs" onClick={() => respondToDraw(true)}>
+                    Accept Draw
+                  </button>
+                  <button type="button" className="btn btn-ghost join-item btn-xs" onClick={() => respondToDraw(false)}>
+                    Decline
+                  </button>
+                </div>
+              )}
+              <button type="button" className="btn btn-error btn-outline btn-xs" onClick={resignMatch}>
+                Resign
+              </button>
+            </>
           )}
         </div>
         <div className="mb-auto flex w-full p-2">

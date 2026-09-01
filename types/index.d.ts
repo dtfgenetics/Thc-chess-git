@@ -12,6 +12,7 @@ export interface Game {
     observers?: User[];
     startedAt?: number;
     endedAt?: number;
+    drawOfferFrom?: User["id"];
 }
 
 export interface User {

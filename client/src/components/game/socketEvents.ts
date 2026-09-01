@@ -64,6 +64,21 @@ export function initSocket(
         }
     });
 
+    socket.on("drawOffered", ({ from, name }: { from: User["id"]; name?: string | null }) => {
+        actions.updateLobby({ type: "updateLobby", payload: { drawOfferFrom: from } });
+        actions.addMessage({
+            author: { name: "Grow Room" },
+            message: `${name || "A grower"} offered an even harvest.`
+        });
+    });
+
+    socket.on("drawOfferCleared", ({ message }: { message?: string }) => {
+        actions.updateLobby({ type: "updateLobby", payload: { drawOfferFrom: undefined } });
+        if (message) {
+            actions.addMessage({ author: { name: "Grow Room" }, message });
+        }
+    });
+
     socket.on("userJoinedAsPlayer", ({ name, side }: { name: string; side: "white" | "black" }) => {
         actions.addMessage({
             author: { name: "Grow Room" },
