@@ -1,0 +1,42 @@
+name: Refresh 3D dependency lockfile
+
+on:
+  push:
+    branches:
+      - feature/3d-kush-kings
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-lockfile:
+    if: ${{ !contains(github.event.head_commit.message, '[skip lockfile]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: feature/3d-kush-kings
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Refresh lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Commit lockfile when changed
+        run: |
+          if git diff --quiet pnpm-lock.yaml; then
+            echo "pnpm-lock.yaml is already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git commit -m "Update lockfile for 3D chess dependencies [skip lockfile]"
+          git push
