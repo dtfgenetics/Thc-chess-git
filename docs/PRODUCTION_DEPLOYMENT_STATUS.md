@@ -1,45 +1,52 @@
 # Production deployment status
 
-Audit date: 2026-07-01
+Audit date: 2026-09-01
 
-## Repository and CI
+## Source release
 
-- Branch: `fix/site-url-config`
-- Pull request: `https://github.com/dtfgenetics/Thc-chess-git/pull/2`
-- Client CI: frozen install, rebrand check, lint, and production build pass.
-- Server CI: frozen install and TypeScript production build pass.
+- 3D multiplayer release PR: `#8` — merged.
+- Merged `main` release SHA: `d83e540cbe5b93e29a88abb4a0072ba679996716`.
+- Exact-head CI before merge passed the optimized client build, server build, player-seat ownership, observer ownership, resignation ownership, draw-offer ownership, and legacy fallback checks.
+- The source release includes the default 3D WebGL board, 2D fallback, promotion choice, captured-piece trays, animated validated moves, 3D archives, chat, spectators, reconnect handling, resignation, draw offers, and Play Again / New Match.
 
-## Current live state
+The application source is therefore **merged and build verified**.
 
-- `https://dtfseeds.com` responds successfully.
-- `chess.dtfseeds.com` does not resolve in DNS.
-- `chess-api.dtfseeds.com` does not resolve in DNS.
-- The available Hostinger SSH account is shared PHP hosting, not a VPS.
-- The account has PHP 8.2 but no Node.js, npm, pnpm, Docker, Podman, PM2, systemd,
-  PostgreSQL client/server, or Nginx executable.
-- No chess subdomain document roots currently exist under the account's domain directories.
+## Production runtime state
 
-The game is therefore **not deployed**. Uploading the client as static files would not provide
-Next.js server rendering, Socket.io rooms, sessions, chat, spectators, or archived multiplayer
-matches and must not be presented as a production release.
+The public DTF games hub still points visitors to the existing lightweight Kush Kings room shell rather than the merged 3D Next.js/Socket.io runtime.
 
-## Provisioning required
+The last verified Hostinger environment available to this project is shared PHP hosting, not a VPS. That environment does not provide the persistent Node.js, Docker, Socket.io, or PostgreSQL runtime required by the full application. The ChatGPT Hostinger connector available during the 2026-09-01 release pass exposes Horizons website creation/editing only; it does not expose hPanel DNS, VPS provisioning, or SSH administration.
 
-1. Provide Hostinger hPanel/DNS access and provision a VPS, or provide an equivalent Node-capable
-   host plus managed PostgreSQL.
-2. Create `A`/`AAAA` records for `chess.dtfseeds.com` and `chess-api.dtfseeds.com`.
-3. Create `.env.production` from the committed example and supply real PostgreSQL credentials and
-   a generated `SESSION_SECRET`; never commit those values.
-4. Deploy `docker-compose.production.yml` or equivalent persistent client/server services.
-5. Install the supplied Nginx configuration and issue TLS certificates for both hostnames.
-6. Run the endpoint and two-browser multiplayer verification in
-   `docs/DTFSEEDS_DEPLOYMENT.md`.
-7. Only after the live smoke tests pass, add the playable link to the DTF Seeds games hub.
+The 3D release must therefore not be called live yet.
 
-## Credentials/settings still needed
+## Deployment automation prepared
 
-- Hostinger hPanel or authoritative DNS access
-- VPS hostname/IP, SSH user, port, and deploy key authorization
-- Production PostgreSQL host, database, user, password, and TLS requirements
-- Permission to issue TLS certificates for both chess subdomains
-- Permission to update the DTF Seeds games hub after live verification
+The repository now contains an automated production path:
+
+- `.github/workflows/deploy-production.yml`
+- `docker-compose.production.yml`
+- `deploy/caddy/Caddyfile`
+- `deploy/caddy/docker-compose.caddy.yml`
+- `docs/AUTOMATED_PRODUCTION_DEPLOYMENT.md`
+
+The automated path removes the previous host-level Nginx/Certbot requirement. A Docker-capable VPS plus DNS is sufficient; Caddy handles public TLS and WebSocket reverse proxying.
+
+## External provisioning still required
+
+1. Provision a VPS or equivalent persistent Docker-capable Linux host.
+2. Point `chess.dtfseeds.com` and `chess-api.dtfseeds.com` to that host.
+3. Add the required GitHub `production` secrets listed in `AUTOMATED_PRODUCTION_DEPLOYMENT.md`.
+4. Run **Deploy Kush Kings production** for the exact release SHA.
+5. Require both public HTTPS health checks to pass.
+6. Cut the DTF games-hub route/link over to `https://chess.dtfseeds.com`.
+7. Complete two-independent-browser multiplayer QA and mobile/WebGL-fallback QA.
+
+## Release terminology
+
+- **Merged:** yes.
+- **Build verified:** yes.
+- **Deployment automation:** prepared.
+- **VPS provisioned:** not verified.
+- **DNS cutover:** not verified.
+- **Deployed:** no.
+- **Live verified:** no.
