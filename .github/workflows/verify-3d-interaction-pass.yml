@@ -62,6 +62,9 @@ jobs:
       - name: Build server
         run: pnpm build:server
 
+      - name: Verify resignation ownership
+        run: node server/scripts/verify-resignation.mjs
+
       - name: Commit verified interaction pass
         run: |
           if git diff --quiet client/src/components/game/GamePage.tsx client/src/components/game/ThreeChessBoard.tsx client/src/components/game/socketEvents.ts client/src/components/archive/ArchivedGame.tsx server/src/socket/game.socket.ts server/src/socket/index.ts types/index.d.ts; then
