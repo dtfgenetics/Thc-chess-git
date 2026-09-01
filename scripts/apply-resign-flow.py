@@ -22,6 +22,14 @@ if '"resigned"' not in types:
         raise SystemExit("Game endReason union anchor not found")
     types = types.replace(old, new, 1)
 
+# Import the pure, verified ownership resolver.
+resolver_import = 'import { resolveResignationWinner } from "./gameResult.js";\n'
+if resolver_import not in server_game:
+    anchor = 'import { upsertObserver } from "./observerRoster.js";\n'
+    if anchor not in server_game:
+        raise SystemExit("server socket local import anchor not found")
+    server_game = server_game.replace(anchor, resolver_import + anchor, 1)
+
 # Server-authoritative resignation endpoint.
 if 'export async function resignGame' not in server_game:
     anchor = '''// eslint-disable-next-line no-unused-vars
@@ -31,13 +39,8 @@ export async function getLatestGame(this: Socket) {
     const game = activeGames.find((g) => g.code === Array.from(this.rooms)[1]);
     if (!game || game.endReason || game.winner || !game.pgn || !game.white || !game.black) return;
 
-    const userId = this.request.session.user.id;
-    let winnerSide: "white" | "black";
-    if (game.white.id === userId) {
-        winnerSide = "black";
-    } else if (game.black.id === userId) {
-        winnerSide = "white";
-    } else {
+    const winnerSide = resolveResignationWinner(game, this.request.session.user.id);
+    if (!winnerSide) {
         console.log(`resignGame: session user is not seated in the active game.`);
         return;
     }
@@ -69,6 +72,8 @@ export async function getLatestGame(this: Socket) {
     if anchor not in server_game:
         raise SystemExit("server getLatestGame anchor not found")
     server_game = server_game.replace(anchor, resign_fn + anchor, 1)
+elif 'resolveResignationWinner(game, this.request.session.user.id)' not in server_game:
+    raise SystemExit("Existing resignGame implementation does not use the verified resolver")
 
 # Register event.
 if 'resignGame,' not in server_index:
