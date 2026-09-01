@@ -22,7 +22,6 @@ if '"resigned"' not in types:
         raise SystemExit("Game endReason union anchor not found")
     types = types.replace(old, new, 1)
 
-# Import the pure, verified ownership resolver.
 resolver_import = 'import { resolveResignationWinner } from "./gameResult.js";\n'
 if resolver_import not in server_game:
     anchor = 'import { upsertObserver } from "./observerRoster.js";\n'
@@ -30,7 +29,6 @@ if resolver_import not in server_game:
         raise SystemExit("server socket local import anchor not found")
     server_game = server_game.replace(anchor, resolver_import + anchor, 1)
 
-# Server-authoritative resignation endpoint.
 if 'export async function resignGame' not in server_game:
     anchor = '''// eslint-disable-next-line no-unused-vars
 export async function getLatestGame(this: Socket) {
@@ -75,32 +73,22 @@ export async function getLatestGame(this: Socket) {
 elif 'resolveResignationWinner(game, this.request.session.user.id)' not in server_game:
     raise SystemExit("Existing resignGame implementation does not use the verified resolver")
 
-# Register event.
 if 'resignGame,' not in server_index:
     import_anchor = '''    leaveLobby,
     sendMove
 '''
     if import_anchor not in server_index:
         raise SystemExit("server socket import anchor not found")
-    server_index = server_index.replace(
-        import_anchor,
-        '''    leaveLobby,
+    server_index = server_index.replace(import_anchor, '''    leaveLobby,
     resignGame,
     sendMove
-''',
-        1,
-    )
+''', 1)
 if 'socket.on("resignGame", resignGame);' not in server_index:
     handler_anchor = '    socket.on("claimAbandoned", claimAbandoned);\n'
     if handler_anchor not in server_index:
         raise SystemExit("server claimAbandoned handler anchor not found")
-    server_index = server_index.replace(
-        handler_anchor,
-        handler_anchor + '    socket.on("resignGame", resignGame);\n',
-        1,
-    )
+    server_index = server_index.replace(handler_anchor, handler_anchor + '    socket.on("resignGame", resignGame);\n', 1)
 
-# Client game-over chat message.
 if 'reason === "resigned"' not in socket_events:
     anchor = '''            } else if (reason === "checkmate") {
                 m.message = `Harvest complete: ${winnerName} (${displaySide(winnerSide)}) won by checkmate.`;
@@ -114,7 +102,6 @@ if 'reason === "resigned"' not in socket_events:
         raise SystemExit("client game-over reason anchor not found")
     socket_events = socket_events.replace(anchor, replacement, 1)
 
-# GamePage action.
 if 'function resignMatch()' not in game_page:
     anchor = '''  function claimAbandoned(type: "win" | "draw") {
 '''
@@ -145,8 +132,7 @@ if 'onClick={resignMatch}' not in game_page:
         raise SystemExit("GamePage room HUD anchor not found")
     game_page = game_page.replace(anchor, replacement, 1)
 
-# Result copy in live game.
-if 'won after resignation' not in game_page:
+if 'lobby.endReason === "resigned"' not in game_page:
     anchor = '''                  {lobby.endReason === "abandoned"
                     ? lobby.winner === "draw"
 '''
@@ -159,8 +145,7 @@ if 'won after resignation' not in game_page:
         raise SystemExit("GamePage end message anchor not found")
     game_page = game_page.replace(anchor, replacement, 1)
 
-# Result copy in archive.
-if 'won after resignation' not in archive:
+if 'game.endReason === "resigned"' not in archive:
     anchor = '''            {game.endReason === "abandoned"
               ? game.winner === "draw"
 '''
