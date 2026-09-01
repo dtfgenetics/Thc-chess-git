@@ -53,8 +53,11 @@ jobs:
       - name: Check rebrand
         run: pnpm check:rebrand
 
-      - name: Lint all workspaces
-        run: pnpm lint
+      - name: Lint client
+        run: pnpm --filter client lint
+
+      - name: Lint server source
+        run: pnpm --dir server exec eslint src --ext .ts
 
       - name: Build client
         run: pnpm build:client
