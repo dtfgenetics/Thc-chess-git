@@ -1,4 +1,4 @@
-name: Refresh 3D dependency lockfile
+name: Apply and verify 3D chess integration
 
 on:
   push:
@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  refresh-lockfile:
-    if: ${{ !contains(github.event.head_commit.message, '[skip lockfile]') }}
+  integrate-3d-board:
+    if: ${{ !contains(github.event.head_commit.message, '[skip 3d verify]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,17 +26,34 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Refresh lockfile
-        run: pnpm install --no-frozen-lockfile
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Commit lockfile when changed
+      - name: Apply live-board patch
         run: |
-          if git diff --quiet pnpm-lock.yaml; then
-            echo "pnpm-lock.yaml is already current"
+          if git apply --check patches/0003-3d-kush-kings-live-board.patch; then
+            git apply patches/0003-3d-kush-kings-live-board.patch
+          elif git apply --reverse --check patches/0003-3d-kush-kings-live-board.patch; then
+            echo "3D live-board patch is already applied"
+          else
+            echo "3D live-board patch does not apply cleanly"
+            exit 1
+          fi
+
+      - name: Lint client
+        run: pnpm --filter client lint
+
+      - name: Build client
+        run: pnpm build:client
+
+      - name: Commit integrated board when changed
+        run: |
+          if git diff --quiet client/src/components/game/GamePage.tsx; then
+            echo "GamePage integration is already committed"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-lock.yaml
-          git commit -m "Update lockfile for 3D chess dependencies [skip lockfile]"
+          git add client/src/components/game/GamePage.tsx
+          git commit -m "Wire 3D Kush Kings board into live rooms [skip 3d verify]"
           git push
