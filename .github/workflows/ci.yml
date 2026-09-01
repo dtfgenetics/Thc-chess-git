@@ -87,10 +87,12 @@ jobs:
           PGUSER: kush_kings
           PGPASSWORD: ci-placeholder-only
         run: |
+          cp .env.production.example .env.production
           docker compose \
             -f docker-compose.production.yml \
             -f deploy/caddy/docker-compose.caddy.yml \
             config >/dev/null
+          rm -f .env.production
 
       - name: Validate Caddy production config
         run: |
