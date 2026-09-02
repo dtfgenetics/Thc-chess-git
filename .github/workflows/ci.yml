@@ -74,6 +74,9 @@ jobs:
       - name: Verify chat validation and rate limiting
         run: node server/scripts/verify-chat-guard.mjs
 
+      - name: Verify room selection and explicit leave routing
+        run: node server/scripts/verify-room-selection.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 
