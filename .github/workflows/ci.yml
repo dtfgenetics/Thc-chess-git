@@ -95,6 +95,9 @@ jobs:
       - name: Verify room code input boundaries
         run: node server/scripts/verify-room-code.mjs
 
+      - name: Verify grower profile lookup contract
+        run: node server/scripts/verify-profile-contract.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 
