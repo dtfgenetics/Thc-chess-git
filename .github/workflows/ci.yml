@@ -92,6 +92,9 @@ jobs:
       - name: Verify archive query input boundaries
         run: node server/scripts/verify-query-input.mjs
 
+      - name: Verify room code input boundaries
+        run: node server/scripts/verify-room-code.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 
