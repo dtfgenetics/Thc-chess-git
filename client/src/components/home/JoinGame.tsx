@@ -6,6 +6,7 @@ import { useContext, useState } from "react";
 
 import { SessionContext } from "@/context/session";
 import { fetchActiveGame } from "@/lib/game";
+import { parseRoomInvite } from "@/lib/roomCode";
 
 export default function JoinGame() {
   const session = useContext(SessionContext);
@@ -13,30 +14,32 @@ export default function JoinGame() {
   const [notFound, setNotFound] = useState(false);
   const router = useRouter();
 
+  function showJoinError() {
+    setNotFound(true);
+    setTimeout(() => setNotFound(false), 5000);
+  }
+
   async function submitJoinGame(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!session?.user?.id) return;
 
     const target = e.target as HTMLFormElement;
     const codeEl = target.elements.namedItem("joinGameCode") as HTMLInputElement;
+    const code = parseRoomInvite(codeEl.value);
 
-    let code = codeEl.value.trim();
-    if (!code) return;
-
-    setButtonLoading(true);
-
-    if (code.startsWith("http")) {
-      code = new URL(code).pathname.split("/")[1];
+    if (!code) {
+      showJoinError();
+      return;
     }
 
+    setButtonLoading(true);
     const game = await fetchActiveGame(code);
 
     if (game && game.code) {
       router.push(`/${game.code}`);
     } else {
       setButtonLoading(false);
-      setNotFound(true);
-      setTimeout(() => setNotFound(false), 5000);
+      showJoinError();
       codeEl.value = "";
     }
   }
@@ -44,7 +47,7 @@ export default function JoinGame() {
   return (
     <form
       className={"input-group" + (notFound ? " tooltip tooltip-error tooltip-open" : "")}
-      data-tip="session not found"
+      data-tip="Invalid invite or session not found"
       onSubmit={submitJoinGame}
     >
       <input
@@ -53,6 +56,9 @@ export default function JoinGame() {
         className="input input-bordered"
         name="joinGameCode"
         id="joinGameCode"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
       />
       <button
         className={
