@@ -10,11 +10,16 @@ import { createGame } from "@/lib/game";
 export default function CreateGame() {
   const session = useContext(SessionContext);
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const router = useRouter();
 
   async function submitCreateGame(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!session?.user?.id) return;
+    if (!session?.user?.id || buttonLoading) return;
+
+    if (createError) {
+      setCreateError(null);
+    }
     setButtonLoading(true);
 
     const target = e.target as HTMLFormElement;
@@ -22,13 +27,16 @@ export default function CreateGame() {
     const startingSide = (target.elements.namedItem("createStartingSide") as HTMLSelectElement)
       .value;
 
-    const game = await createGame(startingSide, unlisted.checked);
+    const result = await createGame(startingSide, unlisted.checked);
 
-    if (game) {
-      router.push(`/${game.code}`);
-    } else {
+    if (typeof result === "string") {
+      setCreateError(result);
       setButtonLoading(false);
-      // TODO: Show error message
+    } else if (result?.code) {
+      router.push(`/${result.code}`);
+    } else {
+      setCreateError("Unable to start a Kush Kings match.");
+      setButtonLoading(false);
     }
   }
 
@@ -36,7 +44,13 @@ export default function CreateGame() {
     <form className="form-control w-full max-w-xs gap-2" onSubmit={submitCreateGame}>
       <label className="label cursor-pointer gap-4 rounded-xl bg-base-300 px-4">
         <span className="label-text">Private grower invite only</span>
-        <input type="checkbox" className="checkbox checkbox-primary" name="createUnlisted" id="createUnlisted" />
+        <input
+          type="checkbox"
+          className="checkbox checkbox-primary"
+          name="createUnlisted"
+          id="createUnlisted"
+          disabled={buttonLoading}
+        />
       </label>
       <label className="label" htmlFor="createStartingSide">
         <span className="label-text">Choose your side</span>
@@ -46,6 +60,7 @@ export default function CreateGame() {
           className="select select-bordered"
           name="createStartingSide"
           id="createStartingSide"
+          disabled={buttonLoading}
         >
           <option value="random">Random side</option>
           <option value="white">Light side</option>
@@ -58,10 +73,16 @@ export default function CreateGame() {
             (!session?.user?.id ? " btn-disabled text-base-content" : "")
           }
           type="submit"
+          disabled={buttonLoading || !session?.user?.id}
         >
           Start Match
         </button>
       </div>
+      {createError && (
+        <div className="text-error text-sm" role="alert" aria-live="polite">
+          {createError}
+        </div>
+      )}
     </form>
   );
 }
