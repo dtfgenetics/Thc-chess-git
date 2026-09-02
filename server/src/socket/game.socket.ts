@@ -69,14 +69,21 @@ export async function leaveLobby(this: Socket, reason?: DisconnectReason, code?:
         return;
     }
 
+    if (code && !this.rooms.has(code)) {
+        console.log(`leaveLobby: socket is not joined to requested room ${code}; ignoring.`);
+        return;
+    }
+
     const roomCode = resolveRoomCode(this.rooms, code);
-    const game = activeGames.find(
-        (g) =>
-            (roomCode !== undefined && g.code === roomCode) ||
-            (g.black?.connected && g.black?.id === this.request.session.user.id) ||
-            (g.white?.connected && g.white?.id === this.request.session.user.id) ||
-            g.observers?.find((o) => this.request.session.user.id === o.id)
-    );
+    const game =
+        roomCode !== undefined
+            ? activeGames.find((g) => g.code === roomCode)
+            : activeGames.find(
+                  (g) =>
+                      (g.black?.connected && g.black?.id === this.request.session.user.id) ||
+                      (g.white?.connected && g.white?.id === this.request.session.user.id) ||
+                      g.observers?.find((o) => this.request.session.user.id === o.id)
+              );
 
     if (game) {
         const user = game.observers?.find((o) => o.id === this.request.session.user.id);
