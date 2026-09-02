@@ -29,6 +29,9 @@ export default function AuthModal() {
 
   async function submitAuth(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (serverMessage) {
+      setServerMessage(null);
+    }
 
     const target = e.target as HTMLFormElement;
     if (activeTab === "guest") {
@@ -37,13 +40,15 @@ export default function AuthModal() {
 
       setButtonLoading(true);
       const user = await setGuestSession(guestName.value);
-      if (user) {
+      if (typeof user === "string") {
+        setServerMessage(user);
+      } else if (user?.id) {
         session?.setUser(user);
+        guestName.value = "";
         if (modalToggleRef.current?.checked) {
           modalToggleRef.current.checked = false;
         }
       }
-      guestName.value = "";
     } else if (activeTab === "login") {
       const loginName = target.elements.namedItem("loginName") as HTMLInputElement;
       const loginPassword = target.elements.namedItem("loginPassword") as HTMLInputElement;
@@ -55,9 +60,6 @@ export default function AuthModal() {
         setServerMessage(user);
       } else if (user?.id) {
         session?.setUser(user);
-        if (serverMessage) {
-          setServerMessage(null);
-        }
         if (modalToggleRef.current?.checked) {
           modalToggleRef.current.checked = false;
         }
@@ -81,9 +83,6 @@ export default function AuthModal() {
         setServerMessage(user);
       } else if (user?.id) {
         session?.setUser(user);
-        if (serverMessage) {
-          setServerMessage(null);
-        }
         if (modalToggleRef.current?.checked) {
           modalToggleRef.current.checked = false;
         }

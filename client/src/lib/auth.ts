@@ -1,6 +1,18 @@
 import { API_URL } from "@/config";
 import type { User } from "@chessu/types";
 
+async function readServerMessage(res: Response, fallback: string) {
+    try {
+        const body = (await res.json()) as { message?: unknown };
+        if (typeof body.message === "string" && body.message.trim()) {
+            return body.message;
+        }
+    } catch {
+        // Fall back to a client-safe message when the response has no JSON body.
+    }
+    return fallback;
+}
+
 export const fetchSession = async () => {
     try {
         const res = await fetch(`${API_URL}/v1/auth`, {
@@ -30,8 +42,12 @@ export const setGuestSession = async (name: string) => {
             const user: User = await res.json();
             return user;
         }
+        if (!res.ok) {
+            return readServerMessage(res, "Unable to enter as a guest grower.");
+        }
     } catch (err) {
         console.error(err);
+        return "Unable to reach the Kush Kings server.";
     }
 };
 
@@ -48,12 +64,13 @@ export const register = async (name: string, password: string, email?: string) =
         if (res.status === 201) {
             const user: User = await res.json();
             return user;
-        } else if (res.status === 409) {
-            const { message } = await res.json();
-            return message as string;
+        }
+        if (!res.ok) {
+            return readServerMessage(res, "Unable to create the grower account.");
         }
     } catch (err) {
         console.error(err);
+        return "Unable to reach the Kush Kings server.";
     }
 };
 
@@ -70,12 +87,13 @@ export const login = async (name: string, password: string) => {
         if (res.status === 200) {
             const user: User = await res.json();
             return user;
-        } else if (res.status === 404 || res.status === 401) {
-            const { message } = await res.json();
-            return message as string;
+        }
+        if (!res.ok) {
+            return readServerMessage(res, "Unable to sign in to the grower account.");
         }
     } catch (err) {
         console.error(err);
+        return "Unable to reach the Kush Kings server.";
     }
 };
 
@@ -95,7 +113,7 @@ export const logout = async () => {
 
 export const updateUser = async (name?: string, email?: string, password?: string) => {
     try {
-        if (!name && !email && !password) return;
+        if (!name && email === undefined && !password) return;
         const res = await fetch(`${API_URL}/v1/auth/`, {
             method: "PATCH",
             credentials: "include",
@@ -107,11 +125,12 @@ export const updateUser = async (name?: string, email?: string, password?: strin
         if (res.status === 200) {
             const user: User = await res.json();
             return user;
-        } else if (res.status === 409) {
-            const { message } = await res.json();
-            return message as string;
+        }
+        if (!res.ok) {
+            return readServerMessage(res, "Unable to update the grower profile.");
         }
     } catch (err) {
         console.error(err);
+        return "Unable to reach the Kush Kings server.";
     }
 };
