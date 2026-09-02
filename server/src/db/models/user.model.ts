@@ -36,6 +36,19 @@ export const findById = async (id: number) => {
     }
 };
 
+export const findByName = async (name: string) => {
+    try {
+        const res = await db.query(
+            `SELECT id, name, email, wins, losses, draws FROM "user" WHERE name=$1 LIMIT 1`,
+            [name]
+        );
+        return res.rowCount && res.rows[0] ? (res.rows[0] as User) : null;
+    } catch (err: unknown) {
+        console.log(err);
+        return null;
+    }
+};
+
 export const findByNameEmail = async (user: User, includePassword = false, limit?: number) => {
     // if user is not specified, get all users
     if (!user) {
@@ -105,6 +118,7 @@ export const remove = async (id: number) => {
 const UserModel = {
     create,
     findById,
+    findByName,
     findByNameEmail,
     update,
     remove
