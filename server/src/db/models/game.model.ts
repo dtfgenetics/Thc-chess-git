@@ -1,5 +1,6 @@
 import type { Game, User } from "@chessu/types";
 import { db } from "../index.js";
+import { mapGameRow } from "./gameRow.js";
 
 export const activeGames: Game[] = [];
 
@@ -52,22 +53,7 @@ export const save = async (game: Game) => {
                 }
             }
         }
-        return {
-            id: res.rows[0].id,
-            winner: res.rows[0].winner,
-            endReason: res.rows[0].reason,
-            pgn: res.rows[0].pgn,
-            white: {
-                id: res.rows[0].white_id || undefined,
-                name: res.rows[0].white_name || undefined
-            },
-            black: {
-                id: res.rows[0].black_id || undefined,
-                name: res.rows[0].black_name || undefined
-            },
-            startedAt: res.rows[0].started_at.getTime(),
-            endedAt: res.rows[0].ended_at?.getTime() || undefined
-        } as Game;
+        return res.rows[0] ? mapGameRow(res.rows[0]) : null;
     } catch (err: unknown) {
         console.log(err);
         return null;
@@ -80,18 +66,7 @@ export const findById = async (id: number) => {
             `SELECT game.id, game.winner, game.end_reason, game.pgn, white_user.id AS white_id, COALESCE(white_user.name, game.white_name) AS white_name, black_user.id AS black_id, started_at, ended_at, COALESCE(black_user.name, game.black_name) AS black_name FROM game LEFT JOIN "user" white_user ON white_user.id = game.white_id LEFT JOIN "user" black_user ON black_user.id = game.black_id WHERE game.id=$1`,
             [id]
         );
-        if (res.rowCount) {
-            return {
-                id: res.rows[0].id,
-                winner: res.rows[0].winner,
-                endReason: res.rows[0].end_reason,
-                pgn: res.rows[0].pgn,
-                white: { id: res.rows[0].white_id || undefined, name: res.rows[0].white_name },
-                black: { id: res.rows[0].black_id || undefined, name: res.rows[0].black_name },
-                startedAt: res.rows[0].started_at.getTime(),
-                endedAt: res.rows[0].ended_at?.getTime() || undefined
-            } as Game;
-        } else return null;
+        return res.rowCount && res.rows[0] ? mapGameRow(res.rows[0]) : null;
     } catch (err: unknown) {
         console.log(err);
         return null;
@@ -108,18 +83,7 @@ export const findByUserId = async (id: number, limit = 10) => {
             `SELECT game.id, game.winner, game.end_reason, game.pgn, white_user.id AS white_id, COALESCE(white_user.name, game.white_name) AS white_name, black_user.id AS black_id, started_at, ended_at, COALESCE(black_user.name, game.black_name) AS black_name FROM game LEFT JOIN "user" white_user ON white_user.id = game.white_id LEFT JOIN "user" black_user ON black_user.id = game.black_id WHERE white_user.id=$1 OR black_user.id=$1 ORDER BY id DESC LIMIT $2`,
             [id, limit]
         );
-        return res.rows.map((r) => {
-            return {
-                id: r.id,
-                winner: r.winner,
-                endReason: r.end_reason,
-                pgn: r.pgn,
-                white: { id: r.white_id || undefined, name: r.white_name },
-                black: { id: r.black_id || undefined, name: r.black_name },
-                startedAt: r.started_at.getTime(),
-                endedAt: r.ended_at?.getTime() || undefined
-            } as Game;
-        });
+        return res.rows.map(mapGameRow);
     } catch (err: unknown) {
         console.log(err);
         return null;
@@ -129,16 +93,7 @@ export const findByUserId = async (id: number, limit = 10) => {
 export const remove = async (id: number) => {
     try {
         const res = await db.query(`DELETE FROM "game" WHERE id = $1 RETURNING *`, [id]);
-        return {
-            id: res.rows[0].id,
-            winner: res.rows[0].winner,
-            endReason: res.rows[0].end_reason,
-            pgn: res.rows[0].pgn,
-            white: { id: res.rows[0].white_id, name: res.rows[0].white_name },
-            black: { id: res.rows[0].black_id, name: res.rows[0].black_name },
-            startedAt: res.rows[0].started_at.getTime(),
-            endedAt: res.rows[0].ended_at?.getTime() || undefined
-        } as Game;
+        return res.rows[0] ? mapGameRow(res.rows[0]) : null;
     } catch (err: unknown) {
         console.log(err);
         return null;
