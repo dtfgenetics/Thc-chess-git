@@ -4,7 +4,12 @@ import type { DisconnectReason, Socket } from "socket.io";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
 import { io } from "../server.js";
-import { canOfferDraw, canRespondToDraw, resolveResignationWinner } from "./gameResult.js";
+import {
+    canClaimAbandoned,
+    canOfferDraw,
+    canRespondToDraw,
+    resolveResignationWinner
+} from "./gameResult.js";
 import { upsertObserver } from "./observerRoster.js";
 import { userAlreadySeated } from "./playerSeat.js";
 import { resolveRoomCode } from "./roomSelection.js";
@@ -64,14 +69,21 @@ export async function leaveLobby(this: Socket, reason?: DisconnectReason, code?:
         return;
     }
 
+    if (code && !this.rooms.has(code)) {
+        console.log(`leaveLobby: socket is not joined to requested room ${code}; ignoring.`);
+        return;
+    }
+
     const roomCode = resolveRoomCode(this.rooms, code);
-    const game = activeGames.find(
-        (g) =>
-            (roomCode !== undefined && g.code === roomCode) ||
-            (g.black?.connected && g.black?.id === this.request.session.user.id) ||
-            (g.white?.connected && g.white?.id === this.request.session.user.id) ||
-            g.observers?.find((o) => this.request.session.user.id === o.id)
-    );
+    const game =
+        roomCode !== undefined
+            ? activeGames.find((g) => g.code === roomCode)
+            : activeGames.find(
+                  (g) =>
+                      (g.black?.connected && g.black?.id === this.request.session.user.id) ||
+                      (g.white?.connected && g.white?.id === this.request.session.user.id) ||
+                      g.observers?.find((o) => this.request.session.user.id === o.id)
+              );
 
     if (game) {
         const user = game.observers?.find((o) => o.id === this.request.session.user.id);
@@ -124,17 +136,9 @@ export async function claimAbandoned(this: Socket, type: "win" | "draw") {
         return;
     }
 
-    if (
-        (game.white &&
-            game.white.id === this.request.session.user.id &&
-            (game.black?.connected ||
-                Date.now() - (game.black?.disconnectedOn as number) < 50000)) ||
-        (game.black &&
-            game.black.id === this.request.session.user.id &&
-            (game.white?.connected || Date.now() - (game.white?.disconnectedOn as number) < 50000))
-    ) {
+    if (!canClaimAbandoned(game, this.request.session.user.id)) {
         console.log(
-            `claimAbandoned: Invalid claim by ${this.request.session.user.name}. Opponent is still connected or disconnected less than 50 seconds ago.`
+            `claimAbandoned: Invalid claim by ${this.request.session.user.name}. Opponent is connected, has no valid disconnect timestamp, or the grace period has not elapsed.`
         );
         return;
     }

@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - main
-      - fix/site-url-config
+      - "fix/**"
       - "feature/**"
 
 jobs:
@@ -70,6 +70,9 @@ jobs:
 
       - name: Verify draw offer ownership
         run: node server/scripts/verify-draw-offers.mjs
+
+      - name: Verify abandonment claim eligibility
+        run: node server/scripts/verify-abandonment-claim.mjs
 
       - name: Verify chat validation and rate limiting
         run: node server/scripts/verify-chat-guard.mjs
