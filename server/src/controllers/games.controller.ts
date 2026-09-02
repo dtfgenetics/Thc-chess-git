@@ -8,41 +8,42 @@ import {
     normalizeStartingSide,
     normalizeUnlisted
 } from "./gameCreation.js";
+import { normalizeGameLookupQuery } from "./queryInput.js";
 
 export const getGames = async (req: Request, res: Response) => {
     try {
-        if (!req.query.id && !req.query.userid) {
+        const hasId = req.query.id !== undefined;
+        const hasUserId = req.query.userid !== undefined;
+
+        if (!hasId && !hasUserId) {
             // get all active games
             res.status(200).json(activeGames.filter((g) => !g.unlisted && !g.winner));
             return;
         }
 
-        let id, userid;
-        if (req.query.id) {
-            id = parseInt(req.query.id as string);
-        }
-        if (req.query.userid) {
-            userid = parseInt(req.query.userid as string);
+        const lookup = normalizeGameLookupQuery(req.query.id, req.query.userid);
+        if (!lookup) {
+            res.status(400).json({ message: "Provide exactly one valid positive integer: id or userid." });
+            return;
         }
 
-        if (id && !isNaN(id)) {
+        if (lookup.id !== undefined) {
             // get finished game by id
-            const game = await GameModel.findById(id);
+            const game = await GameModel.findById(lookup.id);
             if (!game) {
                 res.status(404).end();
             } else {
                 res.status(200).json(game);
             }
-        } else if (userid && !isNaN(userid)) {
-            // get finished games by user id
-            const games = await GameModel.findByUserId(userid);
-            if (!games) {
-                res.status(404).end();
-            } else {
-                res.status(200).json(games);
-            }
+            return;
+        }
+
+        // get finished games by user id
+        const games = await GameModel.findByUserId(lookup.userId as number);
+        if (!games) {
+            res.status(404).end();
         } else {
-            res.status(400).end();
+            res.status(200).json(games);
         }
     } catch (err: unknown) {
         console.log(err);
