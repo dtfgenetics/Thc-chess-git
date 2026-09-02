@@ -1,5 +1,6 @@
 import type { Socket } from "socket.io";
 
+import { normalizeRoomCode } from "../roomCode.js";
 import { io } from "../server.js";
 import { createChatRateLimiter, normalizeChatMessage } from "./chatGuard.js";
 import {
@@ -31,7 +32,11 @@ const socketConnect = (socket: Socket) => {
 
     socket.on("disconnect", leaveLobby);
 
-    socket.on("joinLobby", joinLobby);
+    socket.on("joinLobby", (code: unknown) => {
+        const normalized = normalizeRoomCode(code);
+        if (!normalized) return;
+        void joinLobby.call(socket, normalized);
+    });
     socket.on("leaveLobby", (code?: string) => {
         void leaveLobby.call(socket, undefined, code);
     });
