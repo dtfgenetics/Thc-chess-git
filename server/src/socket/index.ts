@@ -49,6 +49,10 @@ const socketConnect = (socket: Socket) => {
         }
 
         void chat.call(socket, normalized);
+        socket.emit("chat", {
+            author: req.session.user,
+            message: normalized
+        });
     });
     socket.on("claimAbandoned", claimAbandoned);
     socket.on("resignGame", resignGame);
