@@ -89,6 +89,9 @@ jobs:
       - name: Verify match creation input and room allocation
         run: node server/scripts/verify-game-creation.mjs
 
+      - name: Verify archive query input boundaries
+        run: node server/scripts/verify-query-input.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 
