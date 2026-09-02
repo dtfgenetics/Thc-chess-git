@@ -67,8 +67,13 @@ export const save = async (game: Game) => {
             }
         }
 
+        if (!res.rows[0]) {
+            throw new Error("Game result insert returned no row.");
+        }
+        const savedGame = mapGameRow(res.rows[0]);
+
         await client.query("COMMIT");
-        return res.rows[0] ? mapGameRow(res.rows[0]) : null;
+        return savedGame;
     } catch (err: unknown) {
         if (client) {
             try {
