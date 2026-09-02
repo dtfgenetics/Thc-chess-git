@@ -37,13 +37,14 @@ export default function Settings() {
       !updateUsername.value || updateUsername.value === session?.user?.name
         ? undefined
         : updateUsername.value;
-    const newEmail =
-      !updateEmail.value || updateEmail.value === session?.user?.email
-        ? undefined
-        : updateEmail.value;
+    const currentEmail = session?.user?.email || "";
+    const newEmail = updateEmail.value === currentEmail ? undefined : updateEmail.value;
 
-    if (!newName && !newEmail && !updatePassword.value) return;
+    if (!newName && newEmail === undefined && !updatePassword.value) return;
 
+    if (serverMessage) {
+      setServerMessage(null);
+    }
     setButtonLoading(true);
     const user = await updateUser(newName, newEmail, updatePassword.value || undefined);
 
