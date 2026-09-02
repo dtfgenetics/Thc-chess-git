@@ -32,7 +32,9 @@ const socketConnect = (socket: Socket) => {
     socket.on("disconnect", leaveLobby);
 
     socket.on("joinLobby", joinLobby);
-    socket.on("leaveLobby", leaveLobby);
+    socket.on("leaveLobby", (code?: string) => {
+        void leaveLobby.call(socket, undefined, code);
+    });
 
     socket.on("getLatestGame", getLatestGame);
     socket.on("sendMove", sendMove);
