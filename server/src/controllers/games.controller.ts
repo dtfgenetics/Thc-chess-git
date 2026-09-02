@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { nanoid } from "nanoid";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
+import { normalizeRoomCode } from "../roomCode.js";
 import {
     generateUniqueRoomCode,
     normalizeStartingSide,
@@ -53,12 +54,13 @@ export const getGames = async (req: Request, res: Response) => {
 
 export const getActiveGame = async (req: Request, res: Response) => {
     try {
-        if (!req.params || !req.params.code) {
-            res.status(400).end();
+        const code = normalizeRoomCode(req.params?.code);
+        if (!code) {
+            res.status(400).json({ message: "Invalid match room code." });
             return;
         }
 
-        const game = activeGames.find((g) => g.code === req.params.code);
+        const game = activeGames.find((g) => g.code === code);
 
         if (!game) {
             res.status(404).end();
