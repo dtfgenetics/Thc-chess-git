@@ -1,11 +1,16 @@
 import type { User } from "@chessu/types";
 import { hash, verify } from "argon2";
 import type { Request, Response } from "express";
-import xss from "xss";
 
 import { activeGames } from "../db/models/game.model.js";
 import UserModel from "../db/models/user.model.js";
 import { io } from "../server.js";
+import {
+    normalizeGrowerName,
+    normalizeLoginIdentifier,
+    normalizeOptionalEmail,
+    normalizePassword
+} from "./authInput.js";
 
 function duplicateLabel(label: "Username" | "Email") {
     return label === "Username" ? "Grower name" : "Email";
@@ -30,12 +35,10 @@ export const guestSession = async (req: Request, res: Response) => {
             res.status(403).end();
             return;
         }
-        const name = xss(req.body.name);
 
-        const pattern = /^[A-Za-z0-9]+$/;
-
-        if (!pattern.test(name)) {
-            res.status(400).end();
+        const name = normalizeGrowerName(req.body?.name);
+        if (!name) {
+            res.status(400).json({ message: "Grower name must be 2-16 alphanumeric characters." });
             return;
         }
 
@@ -100,14 +103,20 @@ export const registerUser = async (req: Request, res: Response) => {
             return;
         }
 
-        const name = xss(req.body.name);
-        const email = xss(req.body.email);
-        const password = await hash(req.body.password);
+        const name = normalizeGrowerName(req.body?.name);
+        const email = normalizeOptionalEmail(req.body?.email);
+        const rawPassword = normalizePassword(req.body?.password);
 
-        const pattern = /^[A-Za-z0-9]+$/;
-
-        if (!pattern.test(name)) {
-            res.status(400).end();
+        if (!name) {
+            res.status(400).json({ message: "Grower name must be 2-16 alphanumeric characters." });
+            return;
+        }
+        if (email === null) {
+            res.status(400).json({ message: "Enter a valid email address or leave it blank." });
+            return;
+        }
+        if (!rawPassword) {
+            res.status(400).json({ message: "Password must be 3-128 characters." });
             return;
         }
 
@@ -119,6 +128,7 @@ export const registerUser = async (req: Request, res: Response) => {
             return;
         }
 
+        const password = await hash(rawPassword);
         const newUser = await UserModel.create({ name, email }, password);
         if (!newUser) {
             throw new Error("Failed to create user");
@@ -171,8 +181,12 @@ export const loginUser = async (req: Request, res: Response) => {
             return;
         }
 
-        const nameOrEmail = xss(req.body.name);
-        const password = req.body.password;
+        const nameOrEmail = normalizeLoginIdentifier(req.body?.name);
+        const password = normalizePassword(req.body?.password);
+        if (!nameOrEmail || !password) {
+            res.status(400).json({ message: "Enter a valid grower name/email and password." });
+            return;
+        }
 
         const users = await UserModel.findByNameEmail(
             { name: nameOrEmail, email: nameOrEmail },
@@ -244,21 +258,25 @@ export const updateUser = async (req: Request, res: Response) => {
             return;
         }
 
-        if (!req.body.name && !req.body.email && !req.body.password) {
+        if (!req.body?.name && req.body?.email === undefined && !req.body?.password) {
             res.status(400).end();
             return;
         }
 
-        const name = xss(req.body.name || req.session.user.name);
-        const pattern = /^[A-Za-z0-9]+$/;
-        if (!pattern.test(name)) {
-            res.status(400).end();
+        const name = normalizeGrowerName(req.body?.name ?? req.session.user.name);
+        const email = normalizeOptionalEmail(
+            req.body?.email === undefined ? req.session.user.email : req.body.email
+        );
+        if (!name) {
+            res.status(400).json({ message: "Grower name must be 2-16 alphanumeric characters." });
+            return;
+        }
+        if (email === null) {
+            res.status(400).json({ message: "Enter a valid email address or leave it blank." });
             return;
         }
 
-        const email = xss(req.body.email || req.session.user.email);
         const compareEmail = email || name;
-
         const duplicateUsers = await UserModel.findByNameEmail({ name, email: compareEmail });
         if (
             duplicateUsers &&
@@ -271,8 +289,13 @@ export const updateUser = async (req: Request, res: Response) => {
         }
 
         let password: string | undefined = undefined;
-        if (req.body.password) {
-            password = await hash(req.body.password);
+        if (req.body?.password !== undefined && req.body.password !== "") {
+            const rawPassword = normalizePassword(req.body.password);
+            if (!rawPassword) {
+                res.status(400).json({ message: "Password must be 3-128 characters." });
+                return;
+            }
+            password = await hash(rawPassword);
         }
 
         const updatedUser = await UserModel.update(req.session.user.id, { name, email, password });
