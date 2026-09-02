@@ -8,14 +8,14 @@ export default function Login() {
       </label>
       <input
         type="text"
-        pattern="[A-Za-z0-9]+"
-        title="Alphanumeric characters only"
+        title="Enter your grower name or email address"
         id="loginName"
         name="loginName"
-        placeholder="grower name"
+        placeholder="grower name or email"
         className="input input-bordered"
-        maxLength={16}
+        maxLength={128}
         minLength={2}
+        autoComplete="username"
         required
       />
       <label htmlFor="loginPassword" className="label">
@@ -27,7 +27,9 @@ export default function Login() {
         name="loginPassword"
         placeholder="password"
         className="input input-bordered"
+        maxLength={128}
         minLength={3}
+        autoComplete="current-password"
         required
       />
     </div>
