@@ -1,3 +1,7 @@
+export type GameLookupQuery =
+    | { kind: "game"; id: number }
+    | { kind: "user"; userId: number };
+
 export function parsePositiveInteger(value: unknown): number | null {
     if (typeof value !== "string") return null;
     if (!/^[1-9]\d*$/.test(value)) return null;
@@ -10,7 +14,7 @@ export function parsePositiveInteger(value: unknown): number | null {
 export function normalizeGameLookupQuery(
     idValue: unknown,
     userIdValue: unknown
-): { id?: number; userId?: number } | null {
+): GameLookupQuery | null {
     const hasId = idValue !== undefined;
     const hasUserId = userIdValue !== undefined;
 
@@ -18,9 +22,9 @@ export function normalizeGameLookupQuery(
 
     if (hasId) {
         const id = parsePositiveInteger(idValue);
-        return id === null ? null : { id };
+        return id === null ? null : { kind: "game", id };
     }
 
     const userId = parsePositiveInteger(userIdValue);
-    return userId === null ? null : { userId };
+    return userId === null ? null : { kind: "user", userId };
 }
