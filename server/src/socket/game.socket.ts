@@ -7,6 +7,7 @@ import { io } from "../server.js";
 import { canOfferDraw, canRespondToDraw, resolveResignationWinner } from "./gameResult.js";
 import { upsertObserver } from "./observerRoster.js";
 import { userAlreadySeated } from "./playerSeat.js";
+import { resolveRoomCode } from "./roomSelection.js";
 
 // TODO: clean up
 
@@ -62,9 +63,11 @@ export async function leaveLobby(this: Socket, reason?: DisconnectReason, code?:
         console.log(`leaveLobby: room size is ${this.rooms.size}, aborting...`);
         return;
     }
+
+    const roomCode = resolveRoomCode(this.rooms, code);
     const game = activeGames.find(
         (g) =>
-            g.code === (code || this.rooms.size === 2 ? Array.from(this.rooms)[1] : 0) ||
+            (roomCode !== undefined && g.code === roomCode) ||
             (g.black?.connected && g.black?.id === this.request.session.user.id) ||
             (g.white?.connected && g.white?.id === this.request.session.user.id) ||
             g.observers?.find((o) => this.request.session.user.id === o.id)
@@ -101,7 +104,10 @@ export async function leaveLobby(this: Socket, reason?: DisconnectReason, code?:
             this.to(game.code as string).emit("receivedLatestGame", game);
         }
     }
-    await this.leave(code || Array.from(this.rooms)[1]);
+
+    if (roomCode) {
+        await this.leave(roomCode);
+    }
 }
 
 export async function claimAbandoned(this: Socket, type: "win" | "draw") {
