@@ -27,7 +27,7 @@ export const getGames = async (req: Request, res: Response) => {
             return;
         }
 
-        if (lookup.id !== undefined) {
+        if (lookup.kind === "game") {
             // get finished game by id
             const game = await GameModel.findById(lookup.id);
             if (!game) {
@@ -39,7 +39,7 @@ export const getGames = async (req: Request, res: Response) => {
         }
 
         // get finished games by user id
-        const games = await GameModel.findByUserId(lookup.userId as number);
+        const games = await GameModel.findByUserId(lookup.userId);
         if (!games) {
             res.status(404).end();
         } else {
