@@ -9,7 +9,7 @@ import {
   IconPlayerSkipForward
 } from "@tabler/icons-react";
 
-import type { FormEvent, KeyboardEvent } from "react";
+import type { FormEvent } from "react";
 
 import { SessionContext } from "@/context/session";
 import { useContext, useEffect, useReducer, useRef, useState } from "react";
@@ -34,6 +34,7 @@ import PromotionPicker from "./PromotionPicker";
 import ThreeChessBoard from "./ThreeChessBoard";
 
 const socket = io(API_URL, { withCredentials: true, autoConnect: false });
+const CHAT_MAX_LENGTH = 400;
 
 type PromotionPiece = "q" | "r" | "b" | "n";
 
@@ -97,6 +98,14 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
   const [abandonSeconds, setAbandonSeconds] = useState(60);
   useEffect(() => {
+    const userId = session?.user?.id;
+    const userIsPlayer =
+      userId !== undefined && (lobby.white?.id === userId || lobby.black?.id === userId);
+    const opponentDisconnected =
+      userIsPlayer &&
+      ((lobby.white?.id === userId && lobby.black?.connected === false) ||
+        (lobby.black?.id === userId && lobby.white?.connected === false));
+
     if (
       lobby.side === "s" ||
       lobby.endReason ||
@@ -104,26 +113,38 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
       !lobby.pgn ||
       !lobby.white ||
       !lobby.black ||
-      (lobby.white.id !== session?.user?.id && lobby.black.id !== session?.user?.id)
-    )
-      return;
-
-    let interval: number;
-    if (!lobby.white?.connected || !lobby.black?.connected) {
+      !userIsPlayer ||
+      !opponentDisconnected
+    ) {
       setAbandonSeconds(60);
-      interval = Number(
-        setInterval(() => {
-          if (abandonSeconds === 0 || (lobby.white?.connected && lobby.black?.connected)) {
-            clearInterval(interval);
-            return;
-          }
-          setAbandonSeconds((s) => s - 1);
-        }, 1000)
-      );
+      return;
     }
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lobby.black, lobby.white, lobby.black?.disconnectedOn, lobby.white?.disconnectedOn]);
+
+    setAbandonSeconds(60);
+    const interval = window.setInterval(() => {
+      setAbandonSeconds((seconds) => {
+        if (seconds <= 1) {
+          window.clearInterval(interval);
+          return 0;
+        }
+        return seconds - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [
+    lobby.side,
+    lobby.endReason,
+    lobby.winner,
+    lobby.pgn,
+    lobby.white?.id,
+    lobby.white?.connected,
+    lobby.white?.disconnectedOn,
+    lobby.black?.id,
+    lobby.black?.connected,
+    lobby.black?.disconnectedOn,
+    session?.user?.id
+  ]);
 
   useEffect(() => {
     if (!session?.user || !session.user?.id) return;
@@ -204,21 +225,19 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     setChatMessages((prev) => [...prev, message]);
   }
 
-  function sendChat(message: string) {
-    if (!session?.user) return;
-
-    socket.emit("chat", message);
-    addMessage({ author: session.user, message });
+  function normalizeChat(message: string) {
+    return message.replace(/\s+/g, " ").trim().slice(0, CHAT_MAX_LENGTH);
   }
 
-  function chatKeyUp(e: KeyboardEvent<HTMLInputElement>) {
-    e.preventDefault();
-    if (e.key === "Enter") {
-      const input = e.target as HTMLInputElement;
-      if (!input.value || input.value.length == 0) return;
-      sendChat(input.value);
-      input.value = "";
-    }
+  function sendChat(message: string) {
+    if (!session?.user) return false;
+
+    const normalized = normalizeChat(message);
+    if (!normalized) return false;
+
+    socket.emit("chat", normalized);
+    addMessage({ author: session.user, message: normalized });
+    return true;
   }
 
   function chatClickSend(e: FormEvent<HTMLFormElement>) {
@@ -226,9 +245,9 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
 
     const target = e.target as HTMLFormElement;
     const input = target.elements.namedItem("chatInput") as HTMLInputElement;
-    if (!input.value || input.value.length == 0) return;
-    sendChat(input.value);
-    input.value = "";
+    if (sendChat(input.value)) {
+      input.value = "";
+    }
   }
 
   function makeMove(m: { from: string; to: string; promotion?: string }) {
@@ -939,7 +958,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
                 className="input input-bordered flex-grow"
                 name="chatInput"
                 id="chatInput"
-                onKeyUp={chatKeyUp}
+                maxLength={CHAT_MAX_LENGTH}
                 required
               />
               <button className="btn btn-secondary ml-1" type="submit">
