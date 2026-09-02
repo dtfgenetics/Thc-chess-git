@@ -98,6 +98,9 @@ jobs:
       - name: Verify grower profile lookup contract
         run: node server/scripts/verify-profile-contract.mjs
 
+      - name: Verify result inputs and atomic persistence contract
+        run: node server/scripts/verify-result-persistence.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 

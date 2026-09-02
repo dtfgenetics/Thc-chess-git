@@ -5,6 +5,10 @@ import type { DisconnectReason, Socket } from "socket.io";
 import GameModel, { activeGames } from "../db/models/game.model.js";
 import { io } from "../server.js";
 import {
+    restoreRecoverableGameState,
+    snapshotRecoverableGameState
+} from "./gamePersistence.js";
+import {
     canClaimAbandoned,
     canOfferDraw,
     canRespondToDraw,
@@ -143,24 +147,31 @@ export async function claimAbandoned(this: Socket, type: "win" | "draw") {
         return;
     }
 
+    const previousState = snapshotRecoverableGameState(game);
     game.endReason = "abandoned";
 
     if (type === "draw") {
         game.winner = "draw";
-    } else if (game.white && game.white?.id === this.request.session.user.id) {
+    } else if (game.white.id === this.request.session.user.id) {
         game.winner = "white";
-    } else if (game.black && game.black?.id === this.request.session.user.id) {
+    } else {
         game.winner = "black";
     }
 
-    const { id } = (await GameModel.save(game)) as Game;
-    game.id = id;
+    const saved = await GameModel.save(game);
+    if (!saved?.id) {
+        console.log(`claimAbandoned: failed to persist game ${game.code}.`);
+        restoreRecoverableGameState(game, previousState);
+        io.to(game.code as string).emit("receivedLatestGame", game);
+        return;
+    }
+    game.id = saved.id;
 
     const gameOver = {
         reason: game.endReason,
         winnerName: this.request.session.user.name,
         winnerSide: game.winner === "draw" ? undefined : game.winner,
-        id
+        id: game.id
     };
 
     io.to(game.code as string).emit("gameOver", gameOver);
@@ -204,14 +215,16 @@ export async function respondToDraw(this: Socket, accept: boolean) {
         return;
     }
 
+    const previousState = snapshotRecoverableGameState(game);
     game.drawOfferFrom = undefined;
     game.endReason = "draw";
     game.winner = "draw";
 
-    const saved = (await GameModel.save(game)) as Game | null;
+    const saved = await GameModel.save(game);
     if (!saved?.id) {
         console.log(`respondToDraw: failed to persist game ${game.code}.`);
-        this.emit("receivedLatestGame", game);
+        restoreRecoverableGameState(game, previousState);
+        io.to(game.code as string).emit("receivedLatestGame", game);
         return;
     }
     game.id = saved.id;
@@ -236,13 +249,15 @@ export async function resignGame(this: Socket) {
         return;
     }
 
+    const previousState = snapshotRecoverableGameState(game);
     game.endReason = "resigned";
     game.winner = winnerSide;
 
-    const saved = (await GameModel.save(game)) as Game | null;
+    const saved = await GameModel.save(game);
     if (!saved?.id) {
         console.log(`resignGame: failed to persist game ${game.code}.`);
-        this.emit("receivedLatestGame", game);
+        restoreRecoverableGameState(game, previousState);
+        io.to(game.code as string).emit("receivedLatestGame", game);
         return;
     }
     game.id = saved.id;
@@ -273,6 +288,8 @@ export async function sendMove(this: Socket, m: { from: string; to: string; prom
         chess.loadPgn(game.pgn);
     }
 
+    const previousState = snapshotRecoverableGameState(game);
+
     try {
         const prevTurn = chess.turn();
 
@@ -284,9 +301,13 @@ export async function sendMove(this: Socket, m: { from: string; to: string; prom
         }
 
         const newMove = chess.move(m);
+        if (!newMove) {
+            throw new Error("invalid move");
+        }
 
-        if (newMove) {
-            game.pgn = chess.pgn();
+        game.pgn = chess.pgn();
+
+        if (!chess.isGameOver()) {
             if (game.drawOfferFrom !== undefined) {
                 game.drawOfferFrom = undefined;
                 io.to(game.code as string).emit("drawOfferCleared", {
@@ -294,41 +315,61 @@ export async function sendMove(this: Socket, m: { from: string; to: string; prom
                 });
             }
             this.to(game.code as string).emit("receivedMove", m);
-            if (chess.isGameOver()) {
-                let reason: Game["endReason"];
-                if (chess.isCheckmate()) reason = "checkmate";
-                else if (chess.isStalemate()) reason = "stalemate";
-                else if (chess.isThreefoldRepetition()) reason = "repetition";
-                else if (chess.isInsufficientMaterial()) reason = "insufficient";
-                else if (chess.isDraw()) reason = "draw";
-
-                const winnerSide =
-                    reason === "checkmate" ? (prevTurn === "w" ? "white" : "black") : undefined;
-                const winnerName =
-                    reason === "checkmate"
-                        ? winnerSide === "white"
-                            ? game.white?.name
-                            : game.black?.name
-                        : undefined;
-                if (reason === "checkmate") {
-                    game.winner = winnerSide;
-                } else {
-                    game.winner = "draw";
-                }
-                game.endReason = reason;
-
-                const { id } = (await GameModel.save(game)) as Game;
-                game.id = id;
-                io.to(game.code as string).emit("gameOver", { reason, winnerName, winnerSide, id });
-
-                if (game.timeout) clearTimeout(game.timeout);
-                activeGames.splice(activeGames.indexOf(game), 1);
-            }
-        } else {
-            throw new Error("invalid move");
+            return;
         }
+
+        let reason: Game["endReason"];
+        if (chess.isCheckmate()) reason = "checkmate";
+        else if (chess.isStalemate()) reason = "stalemate";
+        else if (chess.isThreefoldRepetition()) reason = "repetition";
+        else if (chess.isInsufficientMaterial()) reason = "insufficient";
+        else if (chess.isDraw()) reason = "draw";
+
+        if (!reason) {
+            throw new Error("game ended without a recognized result");
+        }
+
+        const winnerSide =
+            reason === "checkmate" ? (prevTurn === "w" ? "white" : "black") : undefined;
+        const winnerName =
+            reason === "checkmate"
+                ? winnerSide === "white"
+                    ? game.white?.name
+                    : game.black?.name
+                : undefined;
+
+        game.winner = reason === "checkmate" ? winnerSide : "draw";
+        game.endReason = reason;
+
+        const saved = await GameModel.save(game);
+        if (!saved?.id) {
+            console.log(`sendMove: failed to persist terminal game ${game.code}; reverting move.`);
+            restoreRecoverableGameState(game, previousState);
+            io.to(game.code as string).emit("receivedLatestGame", game);
+            return;
+        }
+        game.id = saved.id;
+
+        if (game.drawOfferFrom !== undefined) {
+            game.drawOfferFrom = undefined;
+            io.to(game.code as string).emit("drawOfferCleared", {
+                message: "The draw offer was declined by continuing play."
+            });
+        }
+
+        this.to(game.code as string).emit("receivedMove", m);
+        io.to(game.code as string).emit("gameOver", {
+            reason,
+            winnerName,
+            winnerSide,
+            id: game.id
+        });
+
+        if (game.timeout) clearTimeout(game.timeout);
+        activeGames.splice(activeGames.indexOf(game), 1);
     } catch (e) {
         console.log("sendMove error: " + e);
+        restoreRecoverableGameState(game, previousState);
         this.emit("receivedLatestGame", game);
     }
 }

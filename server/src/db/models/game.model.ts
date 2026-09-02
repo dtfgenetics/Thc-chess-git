@@ -1,10 +1,13 @@
 import type { Game, User } from "@chessu/types";
+import type { PoolClient } from "pg";
+
 import { db } from "../index.js";
 import { mapGameRow } from "./gameRow.js";
 
 export const activeGames: Game[] = [];
 
 export const save = async (game: Game) => {
+    let client: PoolClient | undefined;
     try {
         const white: User = {};
         const black: User = {};
@@ -18,7 +21,11 @@ export const save = async (game: Game) => {
         } else {
             black.id = game.black?.id;
         }
-        const res = await db.query(
+
+        client = await db.connect();
+        await client.query("BEGIN");
+
+        const res = await client.query(
             `INSERT INTO "game"(winner, end_reason, pgn, white_id, white_name, black_id, black_name, started_at) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
             [
                 game.winner || null,
@@ -31,32 +38,54 @@ export const save = async (game: Game) => {
                 new Date(game.startedAt as number)
             ]
         );
+
         if (black.id || white.id) {
-            // draws
             if (game.winner === "draw") {
                 if (white.id) {
-                    await db.query(`UPDATE "user" SET draws = draws + 1 WHERE id = $1`, [white.id]);
+                    await client.query(`UPDATE "user" SET draws = draws + 1 WHERE id = $1`, [
+                        white.id
+                    ]);
                 }
                 if (black.id) {
-                    await db.query(`UPDATE "user" SET draws = draws + 1 WHERE id = $1`, [black.id]);
+                    await client.query(`UPDATE "user" SET draws = draws + 1 WHERE id = $1`, [
+                        black.id
+                    ]);
                 }
             } else {
                 const winner = game.winner === "white" ? white : black;
                 const loser = game.winner === "white" ? black : white;
                 if (winner.id) {
-                    await db.query(`UPDATE "user" SET wins = wins + 1 WHERE id = $1`, [winner.id]);
+                    await client.query(`UPDATE "user" SET wins = wins + 1 WHERE id = $1`, [
+                        winner.id
+                    ]);
                 }
                 if (loser.id) {
-                    await db.query(`UPDATE "user" SET losses = losses + 1 WHERE id = $1`, [
+                    await client.query(`UPDATE "user" SET losses = losses + 1 WHERE id = $1`, [
                         loser.id
                     ]);
                 }
             }
         }
-        return res.rows[0] ? mapGameRow(res.rows[0]) : null;
+
+        if (!res.rows[0]) {
+            throw new Error("Game result insert returned no row.");
+        }
+        const savedGame = mapGameRow(res.rows[0]);
+
+        await client.query("COMMIT");
+        return savedGame;
     } catch (err: unknown) {
+        if (client) {
+            try {
+                await client.query("ROLLBACK");
+            } catch (rollbackError: unknown) {
+                console.log("Failed to rollback game result transaction", rollbackError);
+            }
+        }
         console.log(err);
         return null;
+    } finally {
+        client?.release();
     }
 };
 

@@ -15,6 +15,7 @@ import {
     respondToDraw,
     sendMove
 } from "./game.socket.js";
+import { normalizeAbandonClaim, normalizeDrawResponse } from "./resultInput.js";
 
 const socketConnect = (socket: Socket) => {
     const req = socket.request;
@@ -59,10 +60,18 @@ const socketConnect = (socket: Socket) => {
             message: normalized
         });
     });
-    socket.on("claimAbandoned", claimAbandoned);
+    socket.on("claimAbandoned", (type: unknown) => {
+        const normalized = normalizeAbandonClaim(type);
+        if (!normalized) return;
+        void claimAbandoned.call(socket, normalized);
+    });
     socket.on("resignGame", resignGame);
     socket.on("offerDraw", offerDraw);
-    socket.on("respondToDraw", respondToDraw);
+    socket.on("respondToDraw", (accept: unknown) => {
+        const normalized = normalizeDrawResponse(accept);
+        if (normalized === null) return;
+        void respondToDraw.call(socket, normalized);
+    });
 };
 
 export const init = () => {
