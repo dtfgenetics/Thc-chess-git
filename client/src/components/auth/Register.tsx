@@ -16,6 +16,7 @@ export default function Register() {
         className="input input-bordered"
         maxLength={16}
         minLength={2}
+        autoComplete="username"
         required
       />
       <label htmlFor="registerEmail" className="label">
@@ -27,7 +28,9 @@ export default function Register() {
         name="registerEmail"
         placeholder="email"
         className="input input-bordered"
+        maxLength={128}
         minLength={4}
+        autoComplete="email"
       />
       <label htmlFor="registerPassword" className="label">
         <span className="label-text">Password</span>
@@ -38,7 +41,9 @@ export default function Register() {
         name="registerPassword"
         placeholder="password"
         className="input input-bordered"
+        maxLength={128}
         minLength={3}
+        autoComplete="new-password"
         required
       />
     </div>
