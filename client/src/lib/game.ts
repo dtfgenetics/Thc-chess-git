@@ -1,6 +1,18 @@
 import { API_URL } from "@/config";
 import type { Game } from "@chessu/types";
 
+async function readGameApiMessage(res: Response, fallback: string) {
+    try {
+        const body = (await res.json()) as { message?: unknown };
+        if (typeof body.message === "string" && body.message.trim()) {
+            return body.message;
+        }
+    } catch {
+        // Use a client-safe fallback when the response has no JSON message.
+    }
+    return fallback;
+}
+
 export const createGame = async (side: string, unlisted: boolean) => {
     try {
         const res = await fetch(`${API_URL}/v1/games`, {
@@ -13,12 +25,15 @@ export const createGame = async (side: string, unlisted: boolean) => {
             cache: "no-store"
         });
 
-        if (res && res.status === 201) {
+        if (res.status === 201) {
             const game: Game = await res.json();
             return game;
         }
+
+        return readGameApiMessage(res, "Unable to start a Kush Kings match.");
     } catch (err) {
         console.error(err);
+        return "Unable to reach the Kush Kings server.";
     }
 };
 
