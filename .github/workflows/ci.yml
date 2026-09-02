@@ -80,6 +80,9 @@ jobs:
       - name: Verify room selection and explicit leave routing
         run: node server/scripts/verify-room-selection.mjs
 
+      - name: Verify game database row mapping
+        run: node server/scripts/verify-game-row-mapping.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 
