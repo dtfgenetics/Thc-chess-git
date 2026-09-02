@@ -236,7 +236,6 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     if (!normalized) return false;
 
     socket.emit("chat", normalized);
-    addMessage({ author: session.user, message: normalized });
     return true;
   }
 
