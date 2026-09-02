@@ -3,6 +3,7 @@
 
 import { KUSH_PIECE_ASSETS } from "@/kushTheme";
 import type { Color, PieceSymbol } from "chess.js";
+import { useEffect, useRef } from "react";
 
 type PromotionPiece = Extract<PieceSymbol, "q" | "r" | "b" | "n">;
 
@@ -24,12 +25,26 @@ const OPTIONS: Array<{
 ];
 
 export default function PromotionPicker({ color, onChoose, onCancel }: PromotionPickerProps) {
+  const firstOptionRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    firstOptionRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onCancel();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onCancel]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="promotion-title"
+      aria-describedby="promotion-description"
       onClick={onCancel}
     >
       <div
@@ -40,7 +55,9 @@ export default function PromotionPicker({ color, onChoose, onCancel }: Promotion
           <h2 id="promotion-title" className="text-xl font-bold">
             Upgrade your Seedling
           </h2>
-          <p className="mt-1 text-sm opacity-75">Choose the piece for this promotion.</p>
+          <p id="promotion-description" className="mt-1 text-sm opacity-75">
+            Choose the piece for this promotion. Press Escape to cancel.
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -49,8 +66,9 @@ export default function PromotionPicker({ color, onChoose, onCancel }: Promotion
             return (
               <button
                 key={piece}
+                ref={piece === "q" ? firstOptionRef : undefined}
                 type="button"
-                className="btn h-auto min-h-24 flex-col gap-1 border border-base-300 bg-base-100 py-3 hover:border-primary"
+                className="btn h-auto min-h-24 flex-col gap-1 border border-base-300 bg-base-100 py-3 hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 onClick={() => onChoose(piece)}
               >
                 <span

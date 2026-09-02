@@ -71,6 +71,12 @@ jobs:
       - name: Verify draw offer ownership
         run: node server/scripts/verify-draw-offers.mjs
 
+      - name: Verify chat validation and rate limiting
+        run: node server/scripts/verify-chat-guard.mjs
+
+      - name: Verify room selection and explicit leave routing
+        run: node server/scripts/verify-room-selection.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 

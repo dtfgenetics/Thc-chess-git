@@ -47,6 +47,14 @@ export function initSocket(
         actions.addMessage(message);
     });
 
+    socket.on("chatRejected", ({ reason }: { reason?: string }) => {
+        const message =
+            reason === "rate_limited"
+                ? "Chat is moving too fast. Wait a few seconds before sending another message."
+                : "That chat message could not be sent.";
+        actions.addMessage({ author: { name: "Grow Room" }, message });
+    });
+
     socket.on("receivedLatestGame", (latestGame: Game) => {
         actions.setPlayBtnLoading(false);
         if (latestGame.pgn && latestGame.pgn !== lobby.actualGame.pgn()) {
