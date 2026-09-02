@@ -4,7 +4,12 @@ import type { DisconnectReason, Socket } from "socket.io";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
 import { io } from "../server.js";
-import { canOfferDraw, canRespondToDraw, resolveResignationWinner } from "./gameResult.js";
+import {
+    canClaimAbandoned,
+    canOfferDraw,
+    canRespondToDraw,
+    resolveResignationWinner
+} from "./gameResult.js";
 import { upsertObserver } from "./observerRoster.js";
 import { userAlreadySeated } from "./playerSeat.js";
 import { resolveRoomCode } from "./roomSelection.js";
@@ -124,17 +129,9 @@ export async function claimAbandoned(this: Socket, type: "win" | "draw") {
         return;
     }
 
-    if (
-        (game.white &&
-            game.white.id === this.request.session.user.id &&
-            (game.black?.connected ||
-                Date.now() - (game.black?.disconnectedOn as number) < 50000)) ||
-        (game.black &&
-            game.black.id === this.request.session.user.id &&
-            (game.white?.connected || Date.now() - (game.white?.disconnectedOn as number) < 50000))
-    ) {
+    if (!canClaimAbandoned(game, this.request.session.user.id)) {
         console.log(
-            `claimAbandoned: Invalid claim by ${this.request.session.user.name}. Opponent is still connected or disconnected less than 50 seconds ago.`
+            `claimAbandoned: Invalid claim by ${this.request.session.user.name}. Opponent is connected, has no valid disconnect timestamp, or the grace period has not elapsed.`
         );
         return;
     }
