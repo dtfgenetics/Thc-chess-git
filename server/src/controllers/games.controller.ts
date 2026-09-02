@@ -3,6 +3,11 @@ import type { Request, Response } from "express";
 import { nanoid } from "nanoid";
 
 import GameModel, { activeGames } from "../db/models/game.model.js";
+import {
+    generateUniqueRoomCode,
+    normalizeStartingSide,
+    normalizeUnlisted
+} from "./gameCreation.js";
 
 export const getGames = async (req: Request, res: Response) => {
     try {
@@ -72,29 +77,44 @@ export const createGame = async (req: Request, res: Response) => {
             res.status(401).end();
             return;
         }
+
+        const unlisted = normalizeUnlisted(req.body?.unlisted);
+        const startingSide = normalizeStartingSide(req.body?.side);
+        if (unlisted === null || startingSide === null) {
+            res.status(400).json({ message: "Invalid match creation options." });
+            return;
+        }
+
+        const code = generateUniqueRoomCode(
+            activeGames.flatMap((game) => (game.code ? [game.code] : [])),
+            () => nanoid(6)
+        );
+        if (!code) {
+            console.error("createGame: failed to allocate a unique room code.");
+            res.status(503).json({ message: "Unable to create a unique match room. Try again." });
+            return;
+        }
+
         const user: User = {
             id: req.session.user.id,
             name: req.session.user.name,
             connected: false
         };
-        const unlisted: boolean = req.body.unlisted ?? false;
         const game: Game = {
-            code: nanoid(6),
+            code,
             unlisted,
             host: user,
             pgn: ""
         };
-        if (req.body.side === "white") {
+
+        if (startingSide === "white") {
             game.white = user;
-        } else if (req.body.side === "black") {
+        } else if (startingSide === "black") {
             game.black = user;
+        } else if (Math.floor(Math.random() * 2) === 0) {
+            game.white = user;
         } else {
-            // random
-            if (Math.floor(Math.random() * 2) === 0) {
-                game.white = user;
-            } else {
-                game.black = user;
-            }
+            game.black = user;
         }
         activeGames.push(game);
 
