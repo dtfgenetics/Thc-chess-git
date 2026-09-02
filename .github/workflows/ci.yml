@@ -86,6 +86,9 @@ jobs:
       - name: Verify authentication input boundaries
         run: node server/scripts/verify-auth-input.mjs
 
+      - name: Verify match creation input and room allocation
+        run: node server/scripts/verify-game-creation.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 
