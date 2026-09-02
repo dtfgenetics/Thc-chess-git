@@ -79,6 +79,7 @@ export default function Settings() {
           className="input input-bordered w-full"
           maxLength={16}
           minLength={2}
+          autoComplete="username"
         />
         <label className="label" htmlFor="updateEmail">
           <span className="label-text">Email</span>
@@ -90,7 +91,9 @@ export default function Settings() {
           name="updateEmail"
           placeholder={session.user.email || "Email address"}
           defaultValue={session.user.email}
+          maxLength={128}
           minLength={4}
+          autoComplete="email"
         />
         <label className="label" htmlFor="updatePassword">
           <span className="label-text">Password</span>
@@ -101,7 +104,9 @@ export default function Settings() {
           id="updatePassword"
           name="updatePassword"
           placeholder="New password (optional)"
+          maxLength={128}
           minLength={3}
+          autoComplete="new-password"
         />
         {serverMessage && (
           <div className={serverMessage.includes("successful") ? "text-success" : "text-error"}>
