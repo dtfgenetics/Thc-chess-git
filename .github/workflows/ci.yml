@@ -83,6 +83,9 @@ jobs:
       - name: Verify game database row mapping
         run: node server/scripts/verify-game-row-mapping.mjs
 
+      - name: Verify authentication input boundaries
+        run: node server/scripts/verify-auth-input.mjs
+
   deployment-config-checks:
     runs-on: ubuntu-latest
 
