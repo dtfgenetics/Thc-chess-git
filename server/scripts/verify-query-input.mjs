@@ -17,8 +17,8 @@ assert.equal(parsePositiveInteger(Number.MAX_SAFE_INTEGER.toString()), Number.MA
 assert.equal(parsePositiveInteger((Number.MAX_SAFE_INTEGER + 1).toString()), null);
 assert.equal(parsePositiveInteger(["12"]), null);
 
-assert.deepEqual(normalizeGameLookupQuery("12", undefined), { id: 12 });
-assert.deepEqual(normalizeGameLookupQuery(undefined, "34"), { userId: 34 });
+assert.deepEqual(normalizeGameLookupQuery("12", undefined), { kind: "game", id: 12 });
+assert.deepEqual(normalizeGameLookupQuery(undefined, "34"), { kind: "user", userId: 34 });
 assert.equal(normalizeGameLookupQuery("12", "34"), null);
 assert.equal(normalizeGameLookupQuery(undefined, undefined), null);
 assert.equal(normalizeGameLookupQuery("12junk", undefined), null);
