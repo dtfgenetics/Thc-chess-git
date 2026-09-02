@@ -5,7 +5,7 @@ export const PASSWORD_MIN_LENGTH = 3;
 export const PASSWORD_MAX_LENGTH = 128;
 
 const GROWER_NAME_PATTERN = /^[A-Za-z0-9]+$/;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+$/;
+const EMAIL_PATTERN = /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+$/;
 
 export function normalizeGrowerName(value: unknown): string | null {
     if (typeof value !== "string") return null;
@@ -32,10 +32,10 @@ export function normalizeOptionalEmail(value: unknown): string | undefined | nul
 export function normalizeLoginIdentifier(value: unknown): string | null {
     if (typeof value !== "string") return null;
     const identifier = value.trim();
-    if (identifier.length < GROWER_NAME_MIN_LENGTH || identifier.length > EMAIL_MAX_LENGTH) {
-        return null;
+    if (identifier.includes("@")) {
+        return normalizeOptionalEmail(identifier) ?? null;
     }
-    return identifier;
+    return normalizeGrowerName(identifier);
 }
 
 export function normalizePassword(value: unknown): string | null {
