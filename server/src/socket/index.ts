@@ -15,6 +15,7 @@ import {
     respondToDraw,
     sendMove
 } from "./game.socket.js";
+import { normalizeMoveInput } from "./moveInput.js";
 import { normalizeAbandonClaim, normalizeDrawResponse } from "./resultInput.js";
 
 const socketConnect = (socket: Socket) => {
@@ -43,7 +44,11 @@ const socketConnect = (socket: Socket) => {
     });
 
     socket.on("getLatestGame", getLatestGame);
-    socket.on("sendMove", sendMove);
+    socket.on("sendMove", (move: unknown) => {
+        const normalized = normalizeMoveInput(move);
+        if (!normalized) return;
+        void sendMove.call(socket, normalized);
+    });
     socket.on("joinAsPlayer", joinAsPlayer);
     socket.on("chat", (message: unknown) => {
         const normalized = normalizeChatMessage(message);
