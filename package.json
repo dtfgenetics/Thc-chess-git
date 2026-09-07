@@ -1,6 +1,7 @@
 {
     "name": "kush-kings-chess",
     "private": "true",
+    "version": "0.2.0",
     "packageManager": "pnpm@9.15.9",
     "author": "DTF Seeds / THC - Teaching Healthy Cultivation; forked from dotnize/chessu",
     "license": "MIT",
@@ -12,6 +13,7 @@
         "dev:server": "pnpm --filter server dev",
         "build:client": "pnpm --filter client build",
         "build:server": "pnpm --filter server build",
+        "test:production-runtime": "node scripts/production-runtime-smoke.mjs",
         "start": "concurrently \"pnpm --filter client start\" \"pnpm --filter server start\"",
         "start:client": "pnpm --filter client start",
         "start:server": "pnpm --filter server start",
