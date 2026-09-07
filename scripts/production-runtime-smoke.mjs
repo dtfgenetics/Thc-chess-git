@@ -9,6 +9,10 @@ const baseHeaders = {
   'X-Forwarded-Proto': 'https'
 };
 
+function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+  return fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
+}
+
 const child = spawn(process.execPath, ['server/dist/server.js'], {
   cwd: process.cwd(),
   env: {
@@ -37,7 +41,7 @@ async function waitForHealth() {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     if (child.exitCode !== null) throw new Error(`Server exited early (${child.exitCode}).\n${stdout}\n${stderr}`);
     try {
-      const response = await fetch(`${origin}/health`, { headers: baseHeaders });
+      const response = await fetchWithTimeout(`${origin}/health`, { headers: baseHeaders }, 1500);
       if (response.ok) return response;
     } catch {}
     await new Promise(resolve => setTimeout(resolve, 125));
@@ -62,7 +66,7 @@ try {
   assert.equal(healthJson.status, 'ok');
   assert.equal(healthJson.app, 'Kush Kings Chess');
 
-  const guest = await fetch(`${origin}/v1/auth/guest`, {
+  const guest = await fetchWithTimeout(`${origin}/v1/auth/guest`, {
     method: 'POST',
     headers: { ...baseHeaders, 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'SmokeGrower' })
@@ -73,7 +77,7 @@ try {
   assert.equal(typeof user.id, 'string');
   const cookie = cookieFrom(guest);
 
-  const session = await fetch(`${origin}/v1/auth/`, {
+  const session = await fetchWithTimeout(`${origin}/v1/auth/`, {
     headers: { ...baseHeaders, Cookie: cookie }
   });
   assert.equal(session.status, 200, `Session lookup returned ${session.status}`);
@@ -81,7 +85,7 @@ try {
   assert.equal(sessionUser.name, 'SmokeGrower');
   assert.equal(sessionUser.id, user.id);
 
-  const handshake = await fetch(`${origin}/socket.io/?EIO=4&transport=polling&t=kush-runtime`, {
+  const handshake = await fetchWithTimeout(`${origin}/socket.io/?EIO=4&transport=polling&t=kush-runtime`, {
     headers: { ...baseHeaders, Cookie: cookie }
   });
   assert.equal(handshake.status, 200, `Engine.IO handshake returned ${handshake.status}`);
@@ -91,14 +95,14 @@ try {
   assert.ok(openPacket.sid);
 
   const connectUrl = `${origin}/socket.io/?EIO=4&transport=polling&sid=${encodeURIComponent(openPacket.sid)}`;
-  const connectPost = await fetch(connectUrl, {
+  const connectPost = await fetchWithTimeout(connectUrl, {
     method: 'POST',
     headers: { ...baseHeaders, Cookie: cookie, 'Content-Type': 'text/plain;charset=UTF-8' },
     body: '40'
   });
   assert.equal(connectPost.status, 200, `Socket namespace connect POST returned ${connectPost.status}`);
 
-  const connectPoll = await fetch(connectUrl, { headers: { ...baseHeaders, Cookie: cookie } });
+  const connectPoll = await fetchWithTimeout(connectUrl, { headers: { ...baseHeaders, Cookie: cookie } });
   assert.equal(connectPoll.status, 200, `Socket namespace connect poll returned ${connectPoll.status}`);
   const namespacePacket = await connectPoll.text();
   assert.match(namespacePacket, /40(?:\{|$)/, `Authenticated Socket.IO namespace did not connect: ${namespacePacket}`);
