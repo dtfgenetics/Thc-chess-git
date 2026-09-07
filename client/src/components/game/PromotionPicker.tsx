@@ -17,11 +17,12 @@ const OPTIONS: Array<{
   piece: PromotionPiece;
   title: string;
   chessName: string;
+  shortcut: string;
 }> = [
-  { piece: "q", title: "Mother Plant", chessName: "Queen" },
-  { piece: "r", title: "Grow Tower", chessName: "Rook" },
-  { piece: "b", title: "Breeder", chessName: "Bishop" },
-  { piece: "n", title: "Rolling Knight", chessName: "Knight" }
+  { piece: "q", title: "Mother Plant", chessName: "Queen", shortcut: "Q" },
+  { piece: "r", title: "Grow Tower", chessName: "Rook", shortcut: "R" },
+  { piece: "b", title: "Breeder", chessName: "Bishop", shortcut: "B" },
+  { piece: "n", title: "Rolling Knight", chessName: "Knight", shortcut: "N" }
 ];
 
 export default function PromotionPicker({ color, onChoose, onCancel }: PromotionPickerProps) {
@@ -31,12 +32,22 @@ export default function PromotionPicker({ color, onChoose, onCancel }: Promotion
     firstOptionRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onCancel();
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCancel();
+        return;
+      }
+
+      const option = OPTIONS.find(({ shortcut }) => shortcut.toLowerCase() === event.key.toLowerCase());
+      if (!option) return;
+      event.preventDefault();
+      onChoose(option.piece);
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onCancel]);
+  }, [onCancel, onChoose]);
 
   return (
     <div
@@ -56,18 +67,20 @@ export default function PromotionPicker({ color, onChoose, onCancel }: Promotion
             Upgrade your Seedling
           </h2>
           <p id="promotion-description" className="mt-1 text-sm opacity-75">
-            Choose the piece for this promotion. Press Escape to cancel.
+            Choose a piece, use Q/R/B/N, or press Escape to cancel.
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {OPTIONS.map(({ piece, title, chessName }) => {
+          {OPTIONS.map(({ piece, title, chessName, shortcut }) => {
             const assetKey = `${color}${piece.toUpperCase()}` as keyof typeof KUSH_PIECE_ASSETS;
             return (
               <button
                 key={piece}
                 ref={piece === "q" ? firstOptionRef : undefined}
                 type="button"
+                aria-keyshortcuts={shortcut}
+                aria-label={`${title}, ${chessName}. Press ${shortcut} to choose.`}
                 className="btn h-auto min-h-24 flex-col gap-1 border border-base-300 bg-base-100 py-3 hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 onClick={() => onChoose(piece)}
               >
@@ -77,13 +90,13 @@ export default function PromotionPicker({ color, onChoose, onCancel }: Promotion
                   style={{ backgroundImage: `url(${KUSH_PIECE_ASSETS[assetKey]})` }}
                 />
                 <span className="font-semibold">{title}</span>
-                <span className="text-xs font-normal opacity-65">{chessName}</span>
+                <span className="text-xs font-normal opacity-65">{chessName} · {shortcut}</span>
               </button>
             );
           })}
         </div>
 
-        <button type="button" className="btn btn-ghost mt-4 w-full" onClick={onCancel}>
+        <button type="button" className="btn btn-ghost mt-4 w-full" onClick={onCancel} aria-keyshortcuts="Escape">
           Cancel promotion
         </button>
       </div>
