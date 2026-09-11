@@ -7,6 +7,9 @@ on:
         description: Exact commit SHA from main to deploy; leave blank for current main
         required: false
         type: string
+  workflow_run:
+    workflows: ["Kush Kings Chess CI"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -17,6 +20,11 @@ concurrency:
 
 jobs:
   deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -37,9 +45,16 @@ jobs:
       - name: Resolve release SHA
         id: release
         shell: bash
+        env:
+          REQUESTED_SHA: ${{ github.event.inputs.release_sha || '' }}
+          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha || '' }}
         run: |
           set -euo pipefail
-          requested='${{ inputs.release_sha }}'
+          requested="$REQUESTED_SHA"
+          if [[ "$GITHUB_EVENT_NAME" == 'workflow_run' ]]; then
+            requested="$VERIFIED_SHA"
+            [[ -n "$requested" ]] || { echo 'Successful CI workflow did not provide a release SHA.' >&2; exit 1; }
+          fi
           if [[ -n "$requested" ]]; then
             if [[ ! "$requested" =~ ^[0-9a-fA-F]{40}$ ]]; then
               echo "release_sha must be a full 40-character commit SHA" >&2
@@ -55,7 +70,7 @@ jobs:
             sha="$(git rev-parse HEAD)"
           fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "Deploying exact release $sha"
+          echo "Deploying exact verified release $sha"
 
       - name: Validate deployment secrets
         shell: bash
@@ -167,27 +182,34 @@ jobs:
 
           for attempt in $(seq 1 24); do
             if curl --fail --silent http://127.0.0.1:3001/health | grep -q '"status":"ok"' && \
-               curl --fail --silent http://127.0.0.1:3000/ >/dev/null; then
-              echo "Local client and API health checks passed"
+               curl --fail --silent http://127.0.0.1:3000/ | grep -q 'data-dtf-shell="header-v5"'; then
+              echo "Local client, API, and V5 header health checks passed"
               exit 0
             fi
             sleep 5
           done
 
           "${compose[@]}" logs --tail=200
-          echo "Local production health checks did not become ready" >&2
+          echo "Local production health checks did not become ready with the V5 header" >&2
           exit 1
           REMOTE
 
-      - name: Verify public HTTPS endpoints
+      - name: Verify public HTTPS endpoints and DTFSeeds proxy
         shell: bash
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --retry 12 --retry-delay 5 \
             https://chess-api.dtfseeds.com/health | grep -q '"status":"ok"'
-          curl --fail --silent --show-error --retry 12 --retry-delay 5 \
-            https://chess.dtfseeds.com/ >/dev/null
-          echo "Kush Kings production endpoints are healthy"
+          for url in https://chess.dtfseeds.com/ https://dtfseeds.com/games/kush-kings-chess/; do
+            body="$RUNNER_TEMP/kush-public-$(echo "$url" | tr '/:.' '_').html"
+            curl --fail --silent --show-error --location --retry 12 --retry-delay 5 \
+              --header 'Cache-Control: no-cache, no-store, max-age=0' \
+              "$url?release=${{ steps.release.outputs.sha }}" -o "$body"
+            grep -Fq 'data-dtf-shell="header-v5"' "$body"
+            grep -Fq '<a href="/courses/">Courses</a>' "$body"
+            grep -Fq '>Diagnostic</a>' "$body"
+          done
+          echo "Kush Kings production endpoints and DTFSeeds proxy serve the approved V5 header"
 
       - name: Remove local secret material
         if: always()
