@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import type { ReactNode } from "react";
 
+import DtfSitewideHeader from "@/components/DtfSitewideHeader";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import AuthModal from "@/components/auth/AuthModal";
@@ -44,6 +45,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="overflow-x-hidden">
       <body className="overflow-x-hidden">
+        <DtfSitewideHeader />
+
         <ContextProvider>
           <Header />
 
