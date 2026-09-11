@@ -95,8 +95,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'move'
 ?>
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kush Kings Chess PHP</title><link rel="stylesheet" href="css/style.css"><script src="js/fallback-polish.js" defer></script></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kush Kings Chess PHP</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dtf-sitewide-header-v5.css">
+  <script src="js/fallback-polish.js" defer></script>
+</head>
 <body>
+<header class="dtf-global-header" data-dtf-shell="header-v5" data-dtf-sitewide-header="approved-reference-v1">
+  <div class="dtf-global-header__inner">
+    <a class="dtf-global-brand" href="/" aria-label="DTF Genetics home">
+      <span class="dtf-global-brand__dtf">DTF</span>
+      <span class="dtf-global-brand__genetics">GENETICS</span>
+      <span class="dtf-global-brand__tag">DREAM THE FUTURE <span class="dtf-global-brand__arrow" aria-hidden="true">›</span></span>
+    </a>
+    <button class="dtf-global-menu" type="button" aria-expanded="false" aria-controls="dtf-global-primary-nav" aria-label="Open primary navigation">Menu</button>
+    <nav id="dtf-global-primary-nav" class="dtf-global-nav" aria-label="Primary navigation">
+      <a href="/">Home</a>
+      <a href="/seeds/">Seeds</a>
+      <a href="/learn/">Learn</a>
+      <a href="/courses/">Courses</a>
+      <a href="/tools/" data-dtf-nav-group="diagnostic">Diagnostic</a>
+      <a href="/games/" class="is-active" aria-current="page">Games</a>
+      <a href="/community/">Community</a>
+      <a href="/shop/">Shop</a>
+    </nav>
+    <div class="dtf-global-actions">
+      <div class="dtf-global-actions__icons">
+        <a class="dtf-global-icon" href="/?s=" aria-label="Search DTF Genetics"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.8-3.8"></path></svg></a>
+        <a class="dtf-global-icon" href="/my-account/" aria-label="Account"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
+        <a class="dtf-global-icon" href="/cart/" aria-label="Cart"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1"></circle><circle cx="19" cy="20" r="1"></circle><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 8H6"></path></svg></a>
+      </div>
+      <span class="dtf-global-tagline">Teaching<br />Healthy Cultivation</span>
+    </div>
+  </div>
+</header>
 <main class="app-shell">
 <section class="hero-card"><div class="brand-mark">♔</div><div><p class="eyebrow">DTF Seeds Game Room</p><h1>Kush Kings Chess</h1><p class="lede">Shared-hosting PHP fallback. No VPS. No Node. No new service.</p></div></section>
 <?php if (!$game): ?>
@@ -116,5 +151,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'move'
 </section>
 <?php endif; ?>
 </main>
+<script id="dtf-sitewide-header-v5-script" src="js/dtf-sitewide-header-v5.js"></script>
 </body>
 </html>
