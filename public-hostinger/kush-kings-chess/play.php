@@ -42,9 +42,10 @@ function fen_after_simple(string $fen, string $from, string $to): string {
     return implode('/', $rows) . ' ' . $next . ' - - 0 1';
 }
 
-$room = kkc_room_code((string)($_GET['room'] ?? $_POST['room_code'] ?? ''));
+$roomInput = (string)($_GET['room'] ?? $_POST['room_code'] ?? '');
+$room = trim($roomInput) !== '' ? kkc_room_code($roomInput) : '';
 $notice = '';
-$game = $room ? kkc_get_game($room) : null;
+$game = $room !== '' ? kkc_get_game($room) : null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
     $name = kkc_clean((string)($_POST['player_name'] ?? 'Grower'), 80) ?: 'Grower';
