@@ -5,6 +5,7 @@ import type { Game } from "@chessu/types";
 import { useContext } from "react";
 
 import GamePage from "./GamePage";
+import VisibleTurnAlert from "./VisibleTurnAlert";
 
 export default function GameAuthWrapper({ initialLobby }: { initialLobby: Game }) {
   const session = useContext(SessionContext);
@@ -22,6 +23,7 @@ export default function GameAuthWrapper({ initialLobby }: { initialLobby: Game }
 
   return (
     <div className="kush-game-shell-v2" data-arena="kush-kings">
+      <VisibleTurnAlert />
       <GamePage initialLobby={initialLobby} />
     </div>
   );
