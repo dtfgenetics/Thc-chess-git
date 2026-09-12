@@ -193,12 +193,38 @@ jobs:
         run: |
           find public-hostinger/kush-kings-chess -type f -name '*.php' -print0 | xargs -0 -n1 php -l
 
-      - name: Validate fallback browser helper
-        run: node --check public-hostinger/kush-kings-chess/js/fallback-polish.js
+      - name: Validate fallback browser helpers
+        run: |
+          node --check public-hostinger/kush-kings-chess/js/fallback-polish.js
+          node --check public-hostinger/kush-kings-chess/js/dtf-sitewide-header-v5.js
 
-      - name: Verify fallback assets are wired
+      - name: Verify fallback game assets are wired
         run: |
           grep -q 'js/fallback-polish.js' public-hostinger/kush-kings-chess/play.php
           grep -q 'input\[name="from_sq"\]' public-hostinger/kush-kings-chess/js/fallback-polish.js
           grep -q 'Copy Invite' public-hostinger/kush-kings-chess/js/fallback-polish.js
           grep -q 'prefers-reduced-motion' public-hostinger/kush-kings-chess/css/style.css
+
+      - name: Verify DTFSeeds V5 header on both shared-hosting entry points
+        run: |
+          set -euo pipefail
+          css='public-hostinger/kush-kings-chess/css/dtf-sitewide-header-v5.css'
+          js='public-hostinger/kush-kings-chess/js/dtf-sitewide-header-v5.js'
+          test -s "$css"
+          test -s "$js"
+          grep -Fq '@media(max-width:1120px)' "$css"
+          grep -Fq '@media(max-width:700px)' "$css"
+          grep -Fq 'aria-expanded' "$js"
+          for page in public-hostinger/kush-kings-chess/index.html public-hostinger/kush-kings-chess/play.php; do
+            grep -Fq 'data-dtf-shell="header-v5"' "$page"
+            grep -Fq 'data-dtf-sitewide-header="approved-reference-v1"' "$page"
+            grep -Fq 'css/dtf-sitewide-header-v5.css' "$page"
+            grep -Fq 'js/dtf-sitewide-header-v5.js' "$page"
+            grep -Fq 'href="/seeds/">Seeds</a>' "$page"
+            grep -Fq 'href="/learn/">Learn</a>' "$page"
+            grep -Fq 'href="/courses/">Courses</a>' "$page"
+            grep -Fq '>Diagnostic</a>' "$page"
+            grep -Fq 'href="/games/"' "$page"
+            grep -Fq 'href="/community/">Community</a>' "$page"
+            grep -Fq 'href="/shop/">Shop</a>' "$page"
+          done
