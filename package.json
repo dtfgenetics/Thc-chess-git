@@ -13,7 +13,7 @@
         "dev:server": "pnpm --filter server dev",
         "build:client": "pnpm --filter client build",
         "build:server": "pnpm --filter server build",
-        "test:production-runtime": "node scripts/production-runtime-smoke.mjs",
+        "test:production-runtime": "node scripts/production-runtime-smoke.mjs && node scripts/turn-alert-contract.mjs",
         "start": "concurrently \"pnpm --filter client start\" \"pnpm --filter server start\"",
         "start:client": "pnpm --filter client start",
         "start:server": "pnpm --filter server start",
