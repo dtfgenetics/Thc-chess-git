@@ -196,7 +196,7 @@ jobs:
       - name: Validate fallback browser helpers
         run: |
           node --check public-hostinger/kush-kings-chess/js/fallback-polish.js
-          node --check public-hostinger/kush-kings-chess/js/dtf-sitewide-header-v5.js
+          node --check public-hostinger/kush-kings-chess/js/dtf-sitewide-header-v6.js
 
       - name: Verify fallback game assets are wired
         run: |
@@ -205,11 +205,11 @@ jobs:
           grep -q 'Copy Invite' public-hostinger/kush-kings-chess/js/fallback-polish.js
           grep -q 'prefers-reduced-motion' public-hostinger/kush-kings-chess/css/style.css
 
-      - name: Verify DTFSeeds V5 header on both shared-hosting entry points
+      - name: Verify DTFSeeds V6 header on both shared-hosting entry points
         run: |
           set -euo pipefail
-          css='public-hostinger/kush-kings-chess/css/dtf-sitewide-header-v5.css'
-          js='public-hostinger/kush-kings-chess/js/dtf-sitewide-header-v5.js'
+          css='public-hostinger/kush-kings-chess/css/dtf-sitewide-header-v6.css'
+          js='public-hostinger/kush-kings-chess/js/dtf-sitewide-header-v6.js'
           test -s "$css"
           test -s "$js"
           grep -Fq '@media(max-width:1120px)' "$css"
@@ -218,13 +218,15 @@ jobs:
           for page in public-hostinger/kush-kings-chess/index.html public-hostinger/kush-kings-chess/play.php; do
             grep -Fq 'data-dtf-shell="header-v5"' "$page"
             grep -Fq 'data-dtf-sitewide-header="approved-reference-v1"' "$page"
-            grep -Fq 'css/dtf-sitewide-header-v5.css' "$page"
-            grep -Fq 'js/dtf-sitewide-header-v5.js' "$page"
-            grep -Fq 'href="/seeds/">Seeds</a>' "$page"
+            grep -Fq 'css/dtf-sitewide-header-v6.css' "$page"
+            grep -Fq 'js/dtf-sitewide-header-v6.js' "$page"
+            grep -Fq 'href="/seeds/">Genetics</a>' "$page"
             grep -Fq 'href="/learn/">Learn</a>' "$page"
-            grep -Fq 'href="/courses/">Courses</a>' "$page"
-            grep -Fq '>Diagnostic</a>' "$page"
+            grep -Fq 'href="/tools/">Tools</a>' "$page"
             grep -Fq 'href="/games/"' "$page"
             grep -Fq 'href="/community/">Community</a>' "$page"
             grep -Fq 'href="/shop/">Shop</a>' "$page"
+            ! grep -Fq 'href="/">Home</a>' "$page"
+            ! grep -Fq 'href="/courses/">Courses</a>' "$page"
+            ! grep -Fq '>Diagnostic</a>' "$page"
           done
