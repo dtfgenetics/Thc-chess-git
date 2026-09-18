@@ -8,13 +8,13 @@ const headerCss = `
 @media(max-width:480px){.dtf-global-header__inner{width:min(100% - 14px,1510px);gap:3px}.dtf-global-brand__dtf{font-size:1.62rem}.dtf-global-brand__genetics{margin-top:5px;font-size:.6rem;letter-spacing:.12em}.dtf-global-icon{width:32px;height:34px}.dtf-global-icon svg{width:18px;height:18px}.dtf-global-menu{min-width:38px;height:38px;padding:0 7px;font-size:.72rem}.dtf-global-nav{grid-template-columns:1fr}.dtf-global-nav a{justify-content:flex-start;min-height:48px;padding-inline:14px}}
 `;
 
-const headerScript = `(function(){var header=document.querySelector('[data-dtf-shell="header-v5"]');if(!header)return;var menu=header.querySelector('.dtf-global-menu');var nav=header.querySelector('.dtf-global-nav');function setOpen(open){if(!menu||!nav)return;nav.classList.toggle('is-open',open);menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close primary navigation':'Open primary navigation');}if(menu&&nav){menu.addEventListener('click',function(){setOpen(!nav.classList.contains('is-open'));});nav.addEventListener('click',function(event){if(event.target&&event.target.closest('a'))setOpen(false);});document.addEventListener('keydown',function(event){if(event.key==='Escape'&&nav.classList.contains('is-open')){setOpen(false);menu.focus();}});window.addEventListener('resize',function(){if(window.innerWidth>1120)setOpen(false);});}})();`;
+const headerScript = `(function(){var header=document.querySelector('[data-dtf-shell="header-v6"]');if(!header)return;var menu=header.querySelector('.dtf-global-menu');var nav=header.querySelector('.dtf-global-nav');function setOpen(open){if(!menu||!nav)return;nav.classList.toggle('is-open',open);menu.setAttribute('aria-expanded',String(open));menu.setAttribute('aria-label',open?'Close primary navigation':'Open primary navigation');}if(menu&&nav){menu.addEventListener('click',function(){setOpen(!nav.classList.contains('is-open'));});nav.addEventListener('click',function(event){if(event.target&&event.target.closest('a'))setOpen(false);});document.addEventListener('keydown',function(event){if(event.key==='Escape'&&nav.classList.contains('is-open')){setOpen(false);menu.focus();}});window.addEventListener('resize',function(){if(window.innerWidth>1120)setOpen(false);});}})();`;
 
 export default function DtfSitewideHeader() {
   return (
     <>
-      <style id="dtf-sitewide-header-v5-style" dangerouslySetInnerHTML={{ __html: headerCss }} />
-      <header className="dtf-global-header" data-dtf-shell="header-v5" data-dtf-sitewide-header="approved-reference-v1">
+      <style id="dtf-sitewide-header-v6-style" dangerouslySetInnerHTML={{ __html: headerCss }} />
+      <header className="dtf-global-header" data-dtf-shell="header-v6" data-dtf-sitewide-header="canonical-six-v1">
         <div className="dtf-global-header__inner">
           <a className="dtf-global-brand" href="/" aria-label="DTF Genetics home">
             <span className="dtf-global-brand__dtf">DTF</span>
@@ -23,7 +23,7 @@ export default function DtfSitewideHeader() {
           </a>
           <button className="dtf-global-menu" type="button" aria-expanded="false" aria-controls="dtf-global-primary-nav" aria-label="Open primary navigation">Menu</button>
           <nav id="dtf-global-primary-nav" className="dtf-global-nav" aria-label="Primary navigation">
-            <a href="/">Home</a><a href="/seeds/">Seeds</a><a href="/learn/">Learn</a><a href="/courses/">Courses</a><a href="/tools/" data-dtf-nav-group="diagnostic">Diagnostic</a><a href="/games/" className="is-active" aria-current="page">Games</a><a href="/community/">Community</a><a href="/shop/">Shop</a>
+            <a href="/seeds/">Genetics</a><a href="/learn/">Learn</a><a href="/tools/">Tools</a><a href="/games/" className="is-active" aria-current="page">Games</a><a href="/community/">Community</a><a href="/shop/">Shop</a>
           </nav>
           <div className="dtf-global-actions">
             <div className="dtf-global-actions__icons">
@@ -35,7 +35,7 @@ export default function DtfSitewideHeader() {
           </div>
         </div>
       </header>
-      <script id="dtf-sitewide-header-v5-script" dangerouslySetInnerHTML={{ __html: headerScript }} />
+      <script id="dtf-sitewide-header-v6-script" dangerouslySetInnerHTML={{ __html: headerScript }} />
     </>
   );
 }
