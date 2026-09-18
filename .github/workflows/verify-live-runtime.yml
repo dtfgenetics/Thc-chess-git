@@ -1,0 +1,47 @@
+name: Verify Kush Kings Live Runtime
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy Kush Kings production"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-kush-kings-live
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Validate live checker
+        run: node --check scripts/check-live.mjs
+
+      - name: Check production frontend, API, socket and DTFSeeds proxy
+        run: npm run live:check
+
+      - name: Summarize
+        if: always()
+        run: |
+          {
+            echo '## Kush Kings live runtime check'
+            echo
+            echo '- Frontend: https://chess.dtfseeds.com'
+            echo '- API health: https://chess-api.dtfseeds.com/health'
+            echo '- Socket.IO: https://chess-api.dtfseeds.com/socket.io/'
+            echo '- DTFSeeds proxy: https://dtfseeds.com/games/kush-kings-chess/'
+            echo '- Requires canonical V6 site navigation on both HTML entry points.'
+          } >> "$GITHUB_STEP_SUMMARY"
