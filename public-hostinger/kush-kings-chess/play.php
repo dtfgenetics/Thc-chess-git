@@ -101,11 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'move'
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kush Kings Chess PHP</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/dtf-sitewide-header-v5.css">
+  <link rel="stylesheet" href="css/dtf-sitewide-header-v6.css">
   <script src="js/fallback-polish.js" defer></script>
 </head>
 <body>
-<header class="dtf-global-header" data-dtf-shell="header-v5" data-dtf-sitewide-header="approved-reference-v1">
+<header class="dtf-global-header" data-dtf-shell="header-v6" data-dtf-sitewide-header="canonical-six-v1">
   <div class="dtf-global-header__inner">
     <a class="dtf-global-brand" href="/" aria-label="DTF Genetics home">
       <span class="dtf-global-brand__dtf">DTF</span>
@@ -114,11 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'move'
     </a>
     <button class="dtf-global-menu" type="button" aria-expanded="false" aria-controls="dtf-global-primary-nav" aria-label="Open primary navigation">Menu</button>
     <nav id="dtf-global-primary-nav" class="dtf-global-nav" aria-label="Primary navigation">
-      <a href="/">Home</a>
-      <a href="/seeds/">Seeds</a>
+      <a href="/seeds/">Genetics</a>
       <a href="/learn/">Learn</a>
-      <a href="/courses/">Courses</a>
-      <a href="/tools/" data-dtf-nav-group="diagnostic">Diagnostic</a>
+      <a href="/tools/">Tools</a>
       <a href="/games/" class="is-active" aria-current="page">Games</a>
       <a href="/community/">Community</a>
       <a href="/shop/">Shop</a>
@@ -152,6 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'move'
 </section>
 <?php endif; ?>
 </main>
-<script id="dtf-sitewide-header-v5-script" src="js/dtf-sitewide-header-v5.js"></script>
+<script id="dtf-sitewide-header-v6-script" src="js/dtf-sitewide-header-v6.js"></script>
 </body>
 </html>
