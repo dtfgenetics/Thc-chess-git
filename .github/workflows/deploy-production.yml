@@ -25,7 +25,7 @@ jobs:
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     env:
       SSH_HOST: ${{ secrets.KUSH_VPS_HOST }}
@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
@@ -194,14 +194,14 @@ jobs:
           for attempt in $(seq 1 24); do
             if curl --fail --silent http://127.0.0.1:3001/health | grep -q '"status":"ok"' && \
                curl --fail --silent http://127.0.0.1:3000/ | grep -q 'data-dtf-shell="header-v5"'; then
-              echo "Local client, API, and V5 header health checks passed"
+              echo "Local client, API, and V6 header health checks passed"
               exit 0
             fi
             sleep 5
           done
 
           "${compose[@]}" logs --tail=200
-          echo "Local production health checks did not become ready with the V5 header" >&2
+          echo "Local production health checks did not become ready with the V6 header" >&2
           exit 1
           REMOTE
 
@@ -218,10 +218,17 @@ jobs:
               --header 'Cache-Control: no-cache, no-store, max-age=0' \
               "$url?release=${{ steps.release.outputs.sha }}" -o "$body"
             grep -Fq 'data-dtf-shell="header-v5"' "$body"
-            grep -Fq '<a href="/courses/">Courses</a>' "$body"
-            grep -Fq '>Diagnostic</a>' "$body"
+            grep -Fq 'data-dtf-sitewide-header="canonical-six-v1"' "$body"
+            grep -Fq '>Genetics</a>' "$body"
+            grep -Fq '>Learn</a>' "$body"
+            grep -Fq '>Tools</a>' "$body"
+            grep -Fq '>Games</a>' "$body"
+            grep -Fq '>Community</a>' "$body"
+            grep -Fq '>Shop</a>' "$body"
+            ! grep -Fq '>Courses</a>' "$body"
+            ! grep -Fq '>Diagnostic</a>' "$body"
           done
-          echo "Kush Kings production endpoints and DTFSeeds proxy serve the approved V5 header"
+          echo "Kush Kings production endpoints and DTFSeeds proxy serve the approved V6 header"
 
       - name: Report deployment configuration blocker
         if: steps.preflight.outputs.ready != 'true'
