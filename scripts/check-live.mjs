@@ -28,16 +28,16 @@ async function checkFrontend(url, label) {
   must(/Kush Kings Chess/i.test(body), `${label} is missing game identity`);
   for (const marker of [
     'data-dtf-shell="header-v6"',
-    'data-dtf-sitewide-header="canonical-six-v1"',
-    '>Genetics</a>',
+    'data-dtf-sitewide-header="canonical-eight-v1"',
+    '>Home</a>',
+    '>Seeds</a>',
     '>Learn</a>',
-    '>Tools</a>',
+    '>Courses</a>',
+    '>Diagnostic</a>',
     '>Games</a>',
     '>Community</a>',
     '>Shop</a>'
   ]) must(body.includes(marker), `${label} missing V6 marker: ${marker}`);
-  must(!body.includes('>Courses</a>'), `${label} still exposes retired Courses nav`);
-  must(!body.includes('>Diagnostic</a>'), `${label} still exposes retired Diagnostic nav`);
   console.log(`PASS ${label}: ${response.url}`);
 }
 
