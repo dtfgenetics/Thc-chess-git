@@ -1,0 +1,23 @@
+/* Shared keyboard and touch affordances for the Kush Kings lobby and match UI. */
+:where(a, button, input, select, textarea, [role="button"]):focus-visible {
+  outline: 3px solid hsl(var(--p));
+  outline-offset: 3px;
+}
+
+@media (pointer: coarse) {
+  :where(a, button, [role="button"], input, select) {
+    touch-action: manipulation;
+  }
+
+  .kush-game-shell-v2 .btn,
+  .kush-lobby-primary .btn,
+  .kush-action-card .btn {
+    min-height: 44px;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, [role="button"]):focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

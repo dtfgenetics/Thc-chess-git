@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "@/styles/accessibility.css";
 
 import type { ReactNode } from "react";
 
