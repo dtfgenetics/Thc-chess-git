@@ -23,6 +23,7 @@ import type { ClearPremoves } from "react-chessboard";
 import { Chessboard } from "react-chessboard";
 
 import { API_URL, APP_NAME, SITE_URL } from "@/config";
+import { createScreenWakeLockController, shareOrCopyLink } from "@/lib/browserExperience";
 import { KUSH_BOARD_THEME, KUSH_COPY, KUSH_PIECE_ASSETS } from "@/kushTheme";
 import { io } from "socket.io-client";
 
@@ -65,7 +66,7 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
   const [navIndex, setNavIndex] = useState<number | null>(null);
 
   const [playBtnLoading, setPlayBtnLoading] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
+  const [shareStatus, setShareStatus] = useState<"idle" | "shared" | "copied" | "failed">("idle");
   const [chatMessages, setChatMessages] = useState<Message[]>([
     {
       author: {},
@@ -145,6 +146,16 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     lobby.black?.disconnectedOn,
     session?.user?.id
   ]);
+
+  useEffect(() => {
+    const controller = createScreenWakeLockController();
+    controller.attach();
+    void controller.acquire();
+    return () => {
+      void controller.release();
+      controller.detach();
+    };
+  }, []);
 
   useEffect(() => {
     if (!session?.user || !session.user?.id) return;
@@ -492,17 +503,19 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
     return getGameUrl().replace(/^https?:\/\//, "");
   }
 
-  function copyInvite() {
-    const text = getGameUrl();
-    if ("clipboard" in navigator) {
-      navigator.clipboard.writeText(text);
-    } else {
-      document.execCommand("copy", true, text);
-    }
-    setCopiedLink(true);
-    setTimeout(() => {
-      setCopiedLink(false);
-    }, 5000);
+  async function shareInvite() {
+    const url = getGameUrl();
+    const archived = Boolean(lobby.endReason);
+    const result = await shareOrCopyLink({
+      title: archived ? `${APP_NAME} archived match` : `${APP_NAME} invite`,
+      text: archived ? "Review this Kush Kings Chess match." : `Join Kush Kings Chess room ${initialLobby.code}.`,
+      url,
+      preferShare: !archived
+    });
+
+    if (result === "cancelled") return;
+    setShareStatus(result === "shared" ? "shared" : result === "copied" ? "copied" : "failed");
+    window.setTimeout(() => setShareStatus("idle"), 5000);
   }
 
   function getMoveListHtml() {
@@ -786,19 +799,25 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
               {lobby.endReason ? "Archived match link:" : "Invite another grower:"}
               <div
                 className={
-                  "dropdown dropdown-top dropdown-end" + (copiedLink ? " dropdown-open" : "")
+                  "dropdown dropdown-top dropdown-end" + (shareStatus !== "idle" ? " dropdown-open" : "")
                 }
               >
                 <label
                   tabIndex={0}
                   className="badge badge-md bg-base-300 text-base-content h-8 gap-1 font-mono text-xs sm:h-5 sm:text-sm"
-                  onClick={copyInvite}
+                  onClick={() => void shareInvite()}
                 >
                   <IconCopy size={16} />
                   {getDisplayGameUrl()}
                 </label>
-                <div tabIndex={0} className="dropdown-content badge badge-neutral text-xs shadow">
-                  copied to clipboard
+                <div tabIndex={0} className="dropdown-content badge badge-neutral text-xs shadow" role="status" aria-live="polite">
+                  {shareStatus === "shared"
+                    ? "share menu opened"
+                    : shareStatus === "copied"
+                      ? "copied to clipboard"
+                      : shareStatus === "failed"
+                        ? "sharing unavailable"
+                        : ""}
                 </div>
               </div>
             </div>
