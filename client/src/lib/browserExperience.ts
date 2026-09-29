@@ -1,5 +1,7 @@
 type NavigatorWithWakeLock = Navigator & {
   wakeLock?: {
+    // Type-signature parameters are part of the Web API contract.
+    // eslint-disable-next-line no-unused-vars
     request(type: 'screen'): Promise<WakeLockSentinelLike>;
   };
 };
@@ -7,6 +9,7 @@ type NavigatorWithWakeLock = Navigator & {
 type WakeLockSentinelLike = {
   released?: boolean;
   release(): Promise<void>;
+  // eslint-disable-next-line no-unused-vars
   addEventListener?(type: 'release', listener: () => void): void;
 };
 
@@ -21,7 +24,9 @@ export async function copyText(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(value);
       return true;
     }
-  } catch {}
+  } catch {
+    // Clipboard access can be blocked; fall back to the DOM copy path below.
+  }
 
   try {
     const field = document.createElement("textarea");
