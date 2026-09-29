@@ -112,8 +112,8 @@ export default function GamePage({ initialLobby }: { initialLobby: Game }) {
       lobby.endReason ||
       lobby.winner ||
       !lobby.pgn ||
-      !lobby.white ||
-      !lobby.black ||
+      lobby.white?.id === undefined ||
+      lobby.black?.id === undefined ||
       !userIsPlayer ||
       !opponentDisconnected
     ) {
