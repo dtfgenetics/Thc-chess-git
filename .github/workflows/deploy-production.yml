@@ -84,14 +84,14 @@ jobs:
           if [[ ${#missing[@]} -gt 0 ]]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "missing=$(IFS=,; echo "${missing[*]}")" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Kush Kings deploy waiting on production configuration::Missing required GitHub Actions production secrets: $(IFS=,; echo "${missing[*]}"). Source CI remains green; no production write was attempted."
-            exit 0
+            echo "::error title=Kush Kings deploy blocked by production configuration::Missing required GitHub Actions production secrets: $(IFS=,; echo "${missing[*]}"). Source CI is green, but no production write can occur until these are configured."
+            exit 1
           fi
           if [[ ${#SESSION_SECRET} -lt 32 ]]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
             echo "missing=SESSION_SECRET_MIN_LENGTH" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Kush Kings deploy waiting on production configuration::KUSH_SESSION_SECRET must be at least 32 characters. No production write was attempted."
-            exit 0
+            echo "::error title=Kush Kings deploy blocked by production configuration::KUSH_SESSION_SECRET must be at least 32 characters. No production write was attempted."
+            exit 1
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
           echo "missing=" >> "$GITHUB_OUTPUT"
@@ -227,7 +227,7 @@ jobs:
           echo "Kush Kings production endpoints and DTFSeeds proxy serve the approved V6 header"
 
       - name: Report deployment configuration blocker
-        if: steps.preflight.outputs.ready != 'true'
+        if: always() && steps.preflight.outputs.ready != 'true'
         shell: bash
         run: |
           {
