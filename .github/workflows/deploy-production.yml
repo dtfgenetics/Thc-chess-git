@@ -218,16 +218,11 @@ jobs:
               --header 'Cache-Control: no-cache, no-store, max-age=0' \
               "$url?release=${{ steps.release.outputs.sha }}" -o "$body"
             grep -Fq 'data-dtf-shell="header-v6"' "$body"
-            grep -Fq 'data-dtf-sitewide-header="canonical-eight-v1"' "$body"
+            grep -Fq 'data-dtf-sitewide-header="canonical-five-v1"' "$body"
             grep -Fq '>Seeds</a>' "$body"
             grep -Fq '>Learn</a>' "$body"
-            grep -Fq '>Diagnostic</a>' "$body"
             grep -Fq '>Games</a>' "$body"
-            grep -Fq '>Community</a>' "$body"
             grep -Fq '>Shop</a>' "$body"
-            grep -Fq '>Home</a>' "$body"
-            grep -Fq '>Courses</a>' "$body"
-            grep -Fq '>Diagnostic</a>' "$body"
           done
           echo "Kush Kings production endpoints and DTFSeeds proxy serve the approved V6 header"
 
