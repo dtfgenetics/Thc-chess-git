@@ -4,7 +4,9 @@ const DTF_PROXY = process.env.KUSH_DTF_PROXY_URL || 'https://dtfseeds.com/games/
 const TIMEOUT = 12000;
 
 async function request(url, accept='*/*') {
-  const response = await fetch(url, {
+  let response;
+  try {
+    response = await fetch(url, {
     redirect: 'manual',
     signal: AbortSignal.timeout(TIMEOUT),
     headers: {
@@ -13,7 +15,10 @@ async function request(url, accept='*/*') {
       'cache-control': 'no-cache, no-store, max-age=0',
       pragma: 'no-cache'
     }
-  });
+    });
+  } catch (error) {
+    throw new Error(`Request failed for ${url}: ${error instanceof Error ? error.message : String(error)}`);
+  }
   if (response.status >= 300 && response.status < 400) {
     throw new Error(`Unexpected redirect from ${url}: ${response.headers.get('location') || '<unknown>'}`);
   }
