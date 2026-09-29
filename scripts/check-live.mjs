@@ -5,7 +5,7 @@ const TIMEOUT = 12000;
 
 async function request(url, accept='*/*') {
   const response = await fetch(url, {
-    redirect: 'follow',
+    redirect: 'manual',
     signal: AbortSignal.timeout(TIMEOUT),
     headers: {
       accept,
@@ -14,6 +14,9 @@ async function request(url, accept='*/*') {
       pragma: 'no-cache'
     }
   });
+  if (response.status >= 300 && response.status < 400) {
+    throw new Error(`Unexpected redirect from ${url}: ${response.headers.get('location') || '<unknown>'}`);
+  }
   return { response, body: await response.text() };
 }
 
@@ -28,14 +31,10 @@ async function checkFrontend(url, label) {
   must(/Kush Kings Chess/i.test(body), `${label} is missing game identity`);
   for (const marker of [
     'data-dtf-shell="header-v6"',
-    'data-dtf-sitewide-header="canonical-eight-v1"',
-    '>Home</a>',
+    'data-dtf-sitewide-header="canonical-five-v1"',
     '>Seeds</a>',
     '>Learn</a>',
-    '>Courses</a>',
-    '>Diagnostic</a>',
     '>Games</a>',
-    '>Community</a>',
     '>Shop</a>'
   ]) must(body.includes(marker), `${label} missing V6 marker: ${marker}`);
   console.log(`PASS ${label}: ${response.url}`);
