@@ -104,7 +104,9 @@ docker compose up --build
 
 Production uses separate client and server images through `docker-compose.production.yml`.
 Follow [docs/DTFSEEDS_DEPLOYMENT.md](docs/DTFSEEDS_DEPLOYMENT.md); this application cannot be
-deployed as a static-only site.
+deployed as a static-only site. Automatic deployment after green `main` CI is disabled until the
+Actions variable `KUSH_KINGS_AUTODEPLOY_ENABLED=true` is configured. Manual deployment remains
+available and continues to fail closed when required production secrets are missing.
 
 ## Repository layout
 
