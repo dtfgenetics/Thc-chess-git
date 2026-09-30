@@ -1,93 +1,133 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Kush Kings Chess | DTF Seeds</title>
-  <meta name="description" content="Create a Kush Kings Chess room, invite another grower, or watch a live THC chess board." />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/dtf-sitewide-header-v6.css" />
-</head>
-<body>
-  <header class="dtf-global-header" data-dtf-shell="header-v6" data-dtf-sitewide-header="canonical-eight-v1">
-    <div class="dtf-global-header__inner">
-      <a class="dtf-global-brand" href="/" aria-label="DTF Genetics home">
-        <span class="dtf-global-brand__dtf">DTF</span>
-        <span class="dtf-global-brand__genetics">GENETICS</span>
-        <span class="dtf-global-brand__tag">DREAM THE FUTURE <span class="dtf-global-brand__arrow" aria-hidden="true">›</span></span>
-      </a>
-      <button class="dtf-global-menu" type="button" aria-expanded="false" aria-controls="dtf-global-primary-nav" aria-label="Open primary navigation">Menu</button>
-      <nav id="dtf-global-primary-nav" class="dtf-global-nav" aria-label="Primary navigation">
-        <a href="/" data-dtf-nav-group="home">Home</a>
-        <a href="/seeds/">Seeds</a>
-        <a href="/learn/" data-dtf-nav-group="learn">Learn</a>
-        <a href="/courses/" data-dtf-nav-group="courses">Courses</a>
-        <a href="/tools/" data-dtf-nav-group="diagnostic">Diagnostic</a>
-        <a href="/games/" class="is-active" aria-current="page">Games</a>
-        <a href="/community/">Community</a>
-        <a href="/shop/" data-dtf-nav-group="shop">Shop</a>
-      </nav>
-      <div class="dtf-global-actions">
-        <div class="dtf-global-actions__icons">
-          <a class="dtf-global-icon" href="/?s=" aria-label="Search DTF Genetics"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.8-3.8"></path></svg></a>
-          <a class="dtf-global-icon" href="/my-account/" aria-label="Account"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
-          <a class="dtf-global-icon" href="/cart/" aria-label="Cart"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1"></circle><circle cx="19" cy="20" r="1"></circle><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.6L21 8H6"></path></svg></a>
-        </div>
-        <span class="dtf-global-tagline">Teaching<br />Healthy Cultivation</span>
-      </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Kush Kings Chess</title>
+    <meta
+      name="description"
+      content="Kush Kings Chess multiplayer room for the DTF Seeds games hub."
+    />
+    <link rel="stylesheet" href="./assets/app.css" />
+  </head>
+  <body data-game-status="setup">
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Kush Kings Chess home">
+          <span class="brand-mark">KK</span>
+          <span>
+            <strong>Kush Kings Chess</strong>
+            <small>DTF Seeds game room</small>
+          </span>
+        </a>
+        <div class="room-pill" id="room-pill">No room loaded</div>
+      </header>
+
+      <main class="game-layout">
+        <section class="board-zone" aria-label="Chess board">
+          <div class="player-strip" id="top-player">Dark side open</div>
+          <div class="board-wrap">
+            <div class="board" id="board" aria-label="Kush Kings Chess board"></div>
+          </div>
+          <div class="player-strip" id="bottom-player">Light side open</div>
+        </section>
+
+        <aside class="control-zone" aria-label="Game controls">
+          <section class="panel" id="setup-panel">
+            <h1>Kush Kings Chess</h1>
+            <form class="stack" id="player-form">
+              <label>
+                Display name
+                <input
+                  id="player-name"
+                  name="playerName"
+                  maxlength="24"
+                  autocomplete="nickname"
+                  placeholder="Grower"
+                />
+              </label>
+              <label>
+                Starting side
+                <select id="starting-side" name="startingSide">
+                  <option value="random">Random</option>
+                  <option value="white">Light side</option>
+                  <option value="black">Dark side</option>
+                </select>
+              </label>
+              <div class="button-row">
+                <button type="button" class="primary" id="create-room">Start Match</button>
+                <button type="button" id="new-token">New Local Player</button>
+              </div>
+            </form>
+            <form class="stack join-row" id="join-form">
+              <label>
+                Room code
+                <input
+                  id="join-code"
+                  name="joinCode"
+                  maxlength="12"
+                  autocomplete="off"
+                  placeholder="ABC123"
+                />
+              </label>
+              <button type="submit">Join Session</button>
+            </form>
+          </section>
+
+          <section class="panel" id="status-panel">
+            <div class="status-line">
+              <span id="game-status">Ready</span>
+              <div class="status-actions">
+                <button type="button" id="copy-invite" disabled>Copy Invite</button>
+                <button type="button" id="resign-match" class="danger-action" disabled>Resign</button>
+              </div>
+            </div>
+            <div class="invite-url" id="invite-url">Create or join a room to get an invite.</div>
+            <div class="turn-box" id="turn-box">Waiting for a room.</div>
+            <button type="button" id="cancel-waiting-room" class="danger-action" hidden>Cancel Waiting Room</button>
+            <button type="button" id="rematch-room" hidden>Create Rematch Room</button>
+          </section>
+
+          <section class="panel chat-panel" id="chat-panel">
+            <h2>Room Chat</h2>
+            <ol class="chat-log" id="chat-log"></ol>
+            <form class="chat-form" id="chat-form">
+              <input
+                id="chat-input"
+                maxlength="240"
+                autocomplete="off"
+                placeholder="Grow room chat..."
+              />
+              <button type="submit">Send</button>
+            </form>
+          </section>
+
+          <section class="panel move-panel">
+            <h2>Moves</h2>
+            <ol class="move-list" id="move-list"></ol>
+          </section>
+        </aside>
+      </main>
     </div>
-  </header>
 
-  <main class="app-shell">
-    <section class="hero-card">
-      <div class="brand-mark" aria-hidden="true">♔</div>
-      <div>
-        <p class="eyebrow">DTF Seeds Game Room</p>
-        <h1>Kush Kings Chess</h1>
-        <p class="lede">Create a match, invite another grower, or watch a live board.</p>
-      </div>
-    </section>
-
-    <section class="lobby-card" id="lobby">
-      <label>
-        Grower name
-        <input id="playerName" maxlength="80" placeholder="Grower" autocomplete="nickname" />
-      </label>
-      <div class="button-row">
-        <button id="createGame">Create Match</button>
-        <input id="roomInput" maxlength="12" placeholder="Room code" />
-        <button id="joinGame">Join</button>
-      </div>
-      <p class="small-note">This shared-hosting build uses PHP/MySQL polling so it can run on Hostinger without VPS, Node, Socket.io, or PostgreSQL.</p>
-    </section>
-
-    <section class="game-layout hidden" id="gameLayout">
-      <aside class="panel">
-        <h2>Grow Room</h2>
-        <p><strong>Room:</strong> <span id="roomCode">—</span></p>
-        <p><strong>Your seat:</strong> <span id="playerSide">—</span></p>
-        <p><strong>Turn:</strong> <span id="turnText">—</span></p>
-        <p><strong>Status:</strong> <span id="statusText">—</span></p>
-        <button id="copyInvite">Copy Invite Link</button>
-        <p id="notice" class="notice"></p>
-      </aside>
-
-      <section class="board-wrap">
-        <div id="board" class="board" aria-label="Kush Kings chess board"></div>
-      </section>
-
-      <aside class="panel chat-panel">
-        <h2>Room Chat</h2>
-        <div id="chatLog" class="chat-log"></div>
-        <div class="chat-form">
-          <input id="chatInput" maxlength="500" placeholder="Send a grow-room message" />
-          <button id="sendChat">Send</button>
+    <dialog class="promotion-dialog" id="promotion-dialog" aria-labelledby="promotion-title">
+      <div class="promotion-card">
+        <h2 id="promotion-title">Choose promotion</h2>
+        <p>Pick the piece for your pawn.</p>
+        <div class="promotion-options" id="promotion-options">
+          <button type="button" data-promotion="q">Queen</button>
+          <button type="button" data-promotion="r">Rook</button>
+          <button type="button" data-promotion="b">Bishop</button>
+          <button type="button" data-promotion="n">Knight</button>
         </div>
-      </aside>
-    </section>
-  </main>
+        <button type="button" class="promotion-cancel" id="promotion-cancel">Cancel</button>
+      </div>
+    </dialog>
 
-  <script id="dtf-sitewide-header-v6-script" src="js/dtf-sitewide-header-v6.js"></script>
-  <script src="js/app.js"></script>
-</body>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./assets/poll-auth.js"></script>
+    <script type="module" src="./assets/app.js"></script>
+    <script type="module" src="./assets/rematch.js"></script>
+    <script type="module" src="./assets/waiting-room.js"></script>
+  </body>
 </html>
