@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "repository": "dtfgenetics/Thc-chess-git",
+  "controlRepository": "dtfgenetics/Thc",
+  "defaultBranch": "main",
+  "canonicalDomains": [
+    "Kush Kings Chess game",
+    "THC chess multiplayer runtime",
+    "chess room and persistence system"
+  ],
+  "sourceRoots": [
+    "client/",
+    "server/",
+    "types/",
+    "deploy/",
+    "scripts/",
+    "docs/",
+    "package.json",
+    "pnpm-lock.yaml",
+    "AGENTS.md"
+  ],
+  "protectedPaths": [
+    ".github/workflows/**",
+    ".env*",
+    "docker-compose.production.yml",
+    "deploy/**"
+  ],
+  "verificationProfiles": {
+    "default": {
+      "commands": [
+        "pnpm check:rebrand",
+        "pnpm --filter client lint",
+        "pnpm build:client",
+        "pnpm build:server"
+      ],
+      "ciAuthoritative": true
+    },
+    "runtime": {
+      "commands": [
+        "pnpm check:rebrand",
+        "pnpm --filter client lint",
+        "pnpm build:client",
+        "pnpm build:server",
+        "pnpm test:production-runtime"
+      ],
+      "ciAuthoritative": true
+    },
+    "live": {
+      "commands": [
+        "pnpm check:rebrand",
+        "pnpm --filter client lint",
+        "pnpm build:client",
+        "pnpm build:server",
+        "pnpm test:production-runtime"
+      ],
+      "conditionalLiveCommand": "pnpm live:check",
+      "ciAuthoritative": true
+    }
+  },
+  "production": {
+    "directMutation": "manual-only",
+    "integrationOwner": "dtfgenetics/Thc",
+    "targets": [
+      "https://chess.dtfseeds.com",
+      "https://chess-api.dtfseeds.com"
+    ],
+    "notes": "Two-service persistent runtime with PostgreSQL. Production deployment requires explicit environment/secrets, rollback evidence, and live multiplayer verification."
+  }
+}
