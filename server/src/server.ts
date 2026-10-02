@@ -20,6 +20,14 @@ const corsConfig = {
     credentials: true
 };
 
+const maintenanceMode = process.env.GAME_MAINTENANCE_MODE === "true";
+const multiplayerEnabled = process.env.GAME_MULTIPLAYER_ENABLED !== "false";
+const operationalMetrics = {
+    socketConnections: 0,
+    socketDisconnects: 0,
+    socketRejected: 0
+};
+
 const app = express();
 const server = createServer(app);
 
@@ -41,11 +49,32 @@ app.use(session);
 app.use("/v1", routes);
 
 app.get("/health", (_req, res) => {
-    res.status(200).json({ status: "ok", app: process.env.APP_NAME || "Kush Kings Chess" });
+    res.status(200).json({
+        status: maintenanceMode ? "maintenance" : "ok",
+        app: process.env.APP_NAME || "Kush Kings Chess",
+        maintenance: maintenanceMode,
+        multiplayerEnabled,
+        uptimeSeconds: Math.round(process.uptime()),
+        operationalMetrics: {
+            ...operationalMetrics,
+            connectedSockets: io?.engine?.clientsCount ?? 0
+        }
+    });
 });
 
 // socket.io
 export const io = new Server(server, { cors: corsConfig, pingInterval: 30000, pingTimeout: 50000 });
+io.use((_socket, next) => {
+    if (maintenanceMode) {
+        operationalMetrics.socketRejected += 1;
+        return next(new Error("Kush Kings is temporarily under maintenance."));
+    }
+    if (!multiplayerEnabled) {
+        operationalMetrics.socketRejected += 1;
+        return next(new Error("Kush Kings multiplayer is temporarily disabled."));
+    }
+    next();
+});
 io.use((socket, next) => {
     session(socket.request as Request, {} as Response, next as NextFunction);
 });
@@ -57,6 +86,12 @@ io.use((socket, next) => {
         console.log("io.use: no session");
         socket.disconnect();
     }
+});
+io.on("connection", (socket) => {
+    operationalMetrics.socketConnections += 1;
+    socket.on("disconnect", () => {
+        operationalMetrics.socketDisconnects += 1;
+    });
 });
 initSocket();
 
